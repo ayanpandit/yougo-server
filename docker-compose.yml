@@ -1,0 +1,38 @@
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "${PORT:-3000}:3000"
+    env_file:
+      - .env
+    environment:
+      NODE_ENV: development
+      PORT: 3000
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_USER: ${DB_USER:-yougo}
+      DB_PASSWORD: ${DB_PASSWORD:-yougo_password}
+      DB_NAME: ${DB_NAME:-yougo}
+      DATABASE_URL: postgresql://${DB_USER:-yougo}:${DB_PASSWORD:-yougo_password}@db:${DB_PORT:-5432}/${DB_NAME:-yougo}?schema=public
+    volumes:
+      - ./:/app
+      - /app/node_modules
+    command: npm run dev
+    depends_on:
+      - db
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    ports:
+      - "${DB_PORT:-5432}:5432"
+    environment:
+      POSTGRES_USER: ${DB_USER:-yougo}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-yougo_password}
+      POSTGRES_DB: ${DB_NAME:-yougo}
+    volumes:
+      - db-data:/var/lib/postgresql/data
+
+volumes:
+  db-data:
