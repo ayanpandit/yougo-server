@@ -1,38 +1,37 @@
+version: '3.8'
+
 services:
   api:
     build:
       context: .
       dockerfile: Dockerfile
     ports:
-      - "${PORT:-3000}:3000"
-    env_file:
-      - .env
+      - "8000:8000"
     environment:
-      NODE_ENV: development
-      PORT: 3000
-      DB_HOST: db
-      DB_PORT: 5432
-      DB_USER: ${DB_USER:-yougo}
-      DB_PASSWORD: ${DB_PASSWORD:-yougo_password}
-      DB_NAME: ${DB_NAME:-yougo}
-      DATABASE_URL: postgresql://${DB_USER:-yougo}:${DB_PASSWORD:-yougo_password}@db:${DB_PORT:-5432}/${DB_NAME:-yougo}?schema=public
-    volumes:
-      - ./:/app
-      - /app/node_modules
-    command: npm run dev
+      - PORT=8000
+      - NODE_ENV=production
+      - DATABASE_URL=postgresql://postgres:postgres@db:5432/yougo?schema=public
     depends_on:
-      - db
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
   db:
     image: postgres:16-alpine
-    restart: unless-stopped
     ports:
-      - "${DB_PORT:-5432}:5432"
+      - "5432:5432"
     environment:
-      POSTGRES_USER: ${DB_USER:-yougo}
-      POSTGRES_PASSWORD: ${DB_PASSWORD:-yougo_password}
-      POSTGRES_DB: ${DB_NAME:-yougo}
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: yougo
     volumes:
-      - db-data:/var/lib/postgresql/data
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d yougo"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
 
 volumes:
-  db-data:
+  pgdata:

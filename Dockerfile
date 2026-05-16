@@ -1,26 +1,33 @@
-# syntax=docker/dockerfile:1
+FROM node:20-alpine AS base
 
-FROM node:20-slim AS base
+# Install openssl for Prisma
+RUN apk add --no-cache openssl
+
 WORKDIR /app
 
-FROM base AS deps
+# Dependencies stage
+FROM base AS dependencies
 COPY package.json package-lock.json* ./
-COPY prisma ./prisma
-RUN npm install
+COPY prisma ./prisma/
+RUN npm ci
+RUN npx prisma generate
 
-FROM base AS build
-COPY --from=deps /app/node_modules /app/node_modules
-COPY tsconfig.json ./
-COPY prisma ./prisma
-COPY src ./src
+# Build stage
+FROM dependencies AS build
+COPY . .
 RUN npm run build
 
-FROM base AS runner
+# Production stage
+FROM base AS production
 ENV NODE_ENV=production
+
 COPY package.json package-lock.json* ./
-COPY --from=deps /app/node_modules /app/node_modules
-COPY --from=build /app/dist /app/dist
-COPY prisma ./prisma
-RUN npm prune --omit=dev
-EXPOSE 3000
-CMD ["node", "dist/index.js"]
+COPY prisma ./prisma/
+RUN npm ci --omit=dev
+RUN npx prisma generate
+
+COPY --from=build /app/dist ./dist
+
+EXPOSE 8000
+
+CMD ["npm", "run", "start"]

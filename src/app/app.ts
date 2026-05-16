@@ -1,34 +1,35 @@
-import { Hono } from "hono";
-import { cors } from "hono/cors";
-import { logger } from "hono/logger";
-import { prettyJSON } from "hono/pretty-json";
-import { secureHeaders } from "hono/secure-headers";
+import { Hono } from 'hono';
+import { cors } from 'hono/cors';
+import { logger } from 'hono/logger';
 
-import { corsOptions } from "@/config";
-import { requestId } from "@/middleware";
-import { apiRoutes } from "@/routes";
-import type { AppBindings } from "@/types/hono";
+const app = new Hono();
 
-export const createApp = () => {
-  const app = new Hono<AppBindings>();
+// Global Middlewares
+app.use('*', logger());
+app.use('*', cors());
 
-  app.use("*", logger());
-  app.use("*", requestId);
-  app.use("*", cors(corsOptions));
-  app.use("*", secureHeaders());
-  app.use("*", prettyJSON());
-
-  app.route("/api", apiRoutes);
-
-  app.notFound((c) => c.json({ message: "Not Found" }, 404));
-
-  app.onError((err, c) => {
-    console.error(err);
-    return c.json(
-      { message: "Internal Server Error", requestId: c.req.header("x-request-id") },
-      500,
-    );
+// Health Check
+app.get('/health', c => {
+  return c.json({
+    status: 'ok',
+    timestamp: new Date().toISOString()
   });
+});
 
-  return app;
-};
+// Example route
+app.get('/', c => {
+  return c.text('Welcome to YouGO API');
+});
+
+// 404 Handler
+app.notFound(c => {
+  return c.json({ message: 'Not Found' }, 404);
+});
+
+// Error Handler
+app.onError((err, c) => {
+  console.error(`${err}`);
+  return c.json({ message: 'Internal Server Error' }, 500);
+});
+
+export default app;

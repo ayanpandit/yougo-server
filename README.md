@@ -1,66 +1,59 @@
-# YouGO Server
+# YouGO Backend API
 
-Production-grade backend foundation for YouGO built with Node.js, TypeScript, Hono, Prisma, Better Auth, and PostgreSQL.
+This is the production-ready backend foundation for YouGO, built with Node.js, TypeScript, Hono, and PostgreSQL.
 
-## Features
-- Modular clean architecture layout
-- Type-safe environment configuration with Zod
-- Docker and Docker Compose workflow
-- ESLint, Prettier, and path aliases
-- Hot reload with tsx
-- Better Auth with Google OAuth and magic link
+## Prerequisites
+- Node.js (v20+)
+- Docker & Docker Compose
+- PostgreSQL (if running without Docker)
 
-## Quick start (local)
-1. Copy .env.example to .env and update values
-2. npm install
-3. npm run dev
+## Setup for Local Development
 
-## Docker development
-1. Copy .env.example to .env
-2. docker compose up --build
+1. **Install Dependencies**
+   ```bash
+   npm install
+   ```
 
-## Authentication
-- Better Auth endpoints are mounted under /api/auth/*
-- Configure Google OAuth redirect URLs to:
-	- http://localhost:3000/api/auth/callback/google
-- Set BETTER_AUTH_SECRET and BETTER_AUTH_URL in .env
-- Set GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET for Google OAuth
+2. **Environment Variables**
+   Copy `.env.example` to `.env` and adjust the configuration.
+   ```bash
+   cp .env.example .env
+   ```
+
+3. **Start the Database**
+   You can start the PostgreSQL database using Docker Compose:
+   ```bash
+   docker compose up db -d
+   ```
+
+4. **Initialize Prisma (Database Setup)**
+   ```bash
+   npm run db:push
+   npm run db:generate
+   ```
+
+5. **Start the Development Server**
+   ```bash
+   npm run dev
+   ```
+   The API will be available at `http://localhost:8000`.
 
 ## Scripts
-- dev: Hot reload server
-- build: Compile TypeScript and resolve path aliases
-- start: Run compiled server
-- clean: Remove dist output
-- typecheck: Type-only validation
-- lint / lint:fix: ESLint checks and fixes
-- format / format:check: Prettier format and check
-- auth:generate: Generate Better Auth schema for Prisma
-- db:generate / db:migrate / db:deploy / db:studio: Prisma tooling
 
-## Project structure
-src/
-	app/
-	routes/
-	controllers/
-	services/
-	repositories/
-	middleware/
-	auth/
-	db/
-	validators/
-	websocket/
-	utils/
-	config/
-	types/
-	constants/
-	lib/
+- `npm run dev`: Start development server with hot-reload
+- `npm run build`: Compile TypeScript to `dist`
+- `npm run start`: Start production server
+- `npm run lint`: Run ESLint
+- `npm run format`: Format code with Prettier
+- `npm run typecheck`: Check for TypeScript errors
+- `npm run db:generate`: Generate Prisma Client
+- `npm run db:push`: Push Prisma schema to database
+- `npm run db:studio`: Open Prisma Studio for DB management
 
-Other folders:
-- prisma/
-- docker/
-- scripts/
-- docs/
+## Docker Production Setup
 
-## Documentation
-- docs/developer_guide.md
-- docs/api_integration.md
+To run the entire stack (API + Database) in Docker:
+
+```bash
+docker compose up -d --build
+```

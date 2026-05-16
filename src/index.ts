@@ -1,23 +1,17 @@
-import { serve } from "@hono/node-server";
-import { createApp } from "@/app/app";
-import { env } from "@/config";
-import { prisma } from "@/db";
+import { serve } from '@hono/node-server';
+import app from './app/app';
+import { env } from './config/env';
 
-const app = createApp();
+const port = env.PORT;
 
-const server = serve({
-  fetch: app.fetch,
-  port: env.PORT,
-});
+console.log(`Starting server on port ${port}...`);
 
-const shutdown = async (signal: string) => {
-  console.log(`${signal} received. Shutting down...`);
-  server.close?.();
-  await prisma.$disconnect();
-  process.exit(0);
-};
-
-process.on("SIGTERM", () => void shutdown("SIGTERM"));
-process.on("SIGINT", () => void shutdown("SIGINT"));
-
-console.log(`API running on port ${env.PORT}`);
+serve(
+  {
+    fetch: app.fetch,
+    port
+  },
+  info => {
+    console.log(`🚀 Server is running on http://localhost:${info.port}`);
+  }
+);
