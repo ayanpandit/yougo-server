@@ -25,8 +25,11 @@ We use an explicit Infrastructure-as-Code approach via the `railway.json` file. 
 | `DATABASE_URL` | Connects to your Railway Postgres instance. Railway provides this automatically as `$DATABASE_URL` if linked. |
 | `FRONTEND_URL` | Set to your Vercel/Netlify frontend URL (e.g., `https://yougo.vercel.app`). Used for strict CORS and CSRF protection. |
 | `JWT_SECRET` | A secure, random 64-character string used to cryptographically sign session tokens. |
-| `RESEND_API_KEY` | Your API key from [Resend](https://resend.com). Used for transactional email delivery (verification, password reset). |
-| `EMAIL_FROM` | Sender identity string, e.g. `YouGO <noreply@yourdomain.com>`. Defaults to `YouGO <onboarding@resend.dev>` for testing. |
+| `SMTP_HOST` | SMTP server host (e.g. `sandbox.smtp.mailtrap.io`). |
+| `SMTP_PORT` | SMTP port (e.g. `2525`, `587`). |
+| `SMTP_USER` | SMTP username. |
+| `SMTP_PASS` | SMTP password. |
+| `SMTP_FROM` | Verified sender email address (e.g. `noreply@yougo.com`). |
 | `CLOUDINARY_CLOUD_NAME` | *(Optional)* Cloudinary cloud name for profile image uploads. |
 | `CLOUDINARY_API_KEY` | *(Optional)* Cloudinary API key. |
 | `CLOUDINARY_API_SECRET` | *(Optional)* Cloudinary API secret. |

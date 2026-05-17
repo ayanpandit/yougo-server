@@ -15,8 +15,11 @@ This provides full TypeScript autocomplete for `env.VARIABLE_NAME` across the en
 | `DATABASE_URL` | url | PostgreSQL connection string. |
 | `JWT_SECRET` | string (min 10) | Cryptographic key for signing session tokens. |
 | `FRONTEND_URL` | url | Allowed origin for CORS and CSRF. |
-| `RESEND_API_KEY` | string | API key from [Resend](https://resend.com) for transactional emails. |
-| `EMAIL_FROM` | string | Sender identity (default: `YouGO <onboarding@resend.dev>`). |
+| `SMTP_HOST` | string | SMTP server host (e.g. `sandbox.smtp.mailtrap.io`). |
+| `SMTP_PORT` | number | SMTP port (e.g. `2525`, `587`). |
+| `SMTP_USER` | string | SMTP username. |
+| `SMTP_PASS` | string | SMTP password. |
+| `SMTP_FROM` | string | Verified sender email address (e.g. `noreply@yougo.com`). |
 
 ## Optional Variables
 
@@ -28,5 +31,5 @@ This provides full TypeScript autocomplete for `env.VARIABLE_NAME` across the en
 
 ## Local Setup
 1. Copy `.env.example` to `.env`.
-2. Fill in the required secrets (e.g., a strong `JWT_SECRET`, your `RESEND_API_KEY`).
+2. Fill in the required secrets.
 3. Boot the application.

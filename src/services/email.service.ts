@@ -1,14 +1,29 @@
-import { Resend } from 'resend';
+import nodemailer from 'nodemailer';
 import { env } from '../config/env';
 
-const resend = new Resend(env.RESEND_API_KEY);
-
 class EmailService {
+  private transporter: nodemailer.Transporter;
+
+  constructor() {
+    this.transporter = nodemailer.createTransport({
+      host: env.SMTP_HOST,
+      port: env.SMTP_PORT,
+      secure: env.SMTP_PORT === 465, // true for port 465, false for other ports
+      auth: {
+        user: env.SMTP_USER,
+        pass: env.SMTP_PASS
+      },
+      tls: {
+        rejectUnauthorized: false // Prevents connection failures with self-signed certificates
+      }
+    });
+  }
+
   async sendVerificationEmail(to: string, token: string) {
     const verificationUrl = `${env.FRONTEND_URL}/verify-email?token=${token}`;
 
-    const { error } = await resend.emails.send({
-      from: env.EMAIL_FROM,
+    const mailOptions = {
+      from: env.SMTP_FROM,
       to,
       subject: 'Verify your YouGO Account',
       html: `
@@ -17,11 +32,9 @@ class EmailService {
         <a href="${verificationUrl}">${verificationUrl}</a>
         <p>If you did not request this, please ignore this email.</p>
       `
-    });
+    };
 
-    if (error) {
-      throw new Error(`[EmailService] Resend API error: ${error.message}`);
-    }
+    await this.transporter.sendMail(mailOptions);
   }
 }
 
