@@ -32,11 +32,18 @@ class EmailService {
     const apiToken = process.env.MAILTRAP_API_TOKEN;
     if (apiToken) {
       try {
-        const response = await fetch('https://sandbox.api.mailtrap.io/api/send', {
+        const inboxId = process.env.MAILTRAP_INBOX_ID;
+        const url = inboxId 
+          ? `https://sandbox.api.mailtrap.io/api/send/${inboxId}`
+          : 'https://send.api.mailtrap.io/api/send';
+
+        console.log(`[EmailService] Attempting to send email via Mailtrap HTTP API to URL: ${url}`);
+
+        const response = await fetch(url, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Api-Token': apiToken
+            'Authorization': `Bearer ${apiToken}`
           },
           body: JSON.stringify({
             from: { email: env.SMTP_FROM || 'noreply@yougo.com', name: 'YouGO' },
@@ -50,6 +57,7 @@ class EmailService {
           const errText = await response.text();
           throw new Error(`Mailtrap API responded with ${response.status}: ${errText}`);
         }
+        console.log('[EmailService] Email sent successfully via Mailtrap HTTP API!');
         return; // Success!
       } catch (apiError) {
         console.error('[EmailService] Mailtrap HTTP API failed, falling back to SMTP:', apiError);
