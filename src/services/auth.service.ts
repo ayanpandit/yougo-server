@@ -29,7 +29,10 @@ class AuthService {
       emailVerificationToken: verificationToken
     });
 
-    await emailService.sendVerificationEmail(user.email, verificationToken);
+    // Fire-and-forget the email verification in the background, logging any SMTP errors
+    emailService.sendVerificationEmail(user.email, verificationToken).catch(err => {
+      console.error('[AuthService] SMTP verification email failed to send:', err);
+    });
 
     // Return user without passwordHash
     const { passwordHash: _, ...userWithoutPassword } = user;
