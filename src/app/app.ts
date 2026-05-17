@@ -5,23 +5,25 @@ import { csrf } from 'hono/csrf';
 import { secureHeaders } from 'hono/secure-headers';
 import authRoutes from '../routes/auth.routes';
 import { errorHandler, notFoundHandler } from '../middleware/error.middleware';
+import { env } from '../config/env';
 
 const app = new Hono();
 
 // Global Middlewares
-app.use('*', logger());
-app.use('*', secureHeaders());
+// Using '/*' wildcard pattern instead of '*' to ensure Hono intercepts nested routes and preflights (OPTIONS) correctly
+app.use('/*', logger());
+app.use('/*', secureHeaders());
 app.use(
-  '*',
+  '/*',
   cors({
-    origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+    origin: env.FRONTEND_URL,
     credentials: true
   })
 );
 app.use(
-  '*',
+  '/*',
   csrf({
-    origin: process.env.FRONTEND_URL || 'http://localhost:3000'
+    origin: env.FRONTEND_URL
   })
 );
 
