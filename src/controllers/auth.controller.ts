@@ -105,6 +105,7 @@ export class AuthController {
 
   async uploadProfileImage(c: Context) {
     const user = c.get('user');
+    const oldImageUrl = user.image;
     const body = await c.req.parseBody();
     const file = body.image;
 
@@ -123,6 +124,13 @@ export class AuthController {
 
     const updatedUser = await userRepository.update(user.id, { image: imageUrl });
     const { passwordHash: _, emailVerificationToken: __, ...safeUser } = updatedUser;
+
+    // Async delete of the old Cloudinary image to keep storage clean (non-blocking)
+    if (oldImageUrl) {
+      cloudinaryService.deleteImage(oldImageUrl).catch(err => {
+        console.error('[AuthController] Failed to delete old profile image:', err);
+      });
+    }
 
     return c.json({
       status: 'success',
