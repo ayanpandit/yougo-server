@@ -8,11 +8,39 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// Example Model
-// model User {
-//   id        String   @id @default(uuid())
-//   email     String   @unique
-//   name      String?
-//   createdAt DateTime @default(now())
-//   updatedAt DateTime @updatedAt
-// }
+model User {
+  id                     String    @id @default(uuid())
+  name                   String?
+  username               String    @unique
+  email                  String    @unique
+  passwordHash           String
+  image                  String?
+  bio                    String?
+  gender                 String?
+  dateOfBirth            DateTime?
+  country                String?
+  city                   String?
+  travelStyle            String?
+  interests              String[]
+  languages              String[]
+  isEmailVerified        Boolean   @default(false)
+  emailVerificationToken String?   @unique
+  failedLoginAttempts    Int       @default(0)
+  lockedUntil            DateTime?
+  lastLoginIp            String?
+  tokenVersion           Int       @default(0)
+  createdAt              DateTime  @default(now())
+  updatedAt              DateTime  @updatedAt
+  AuditLog               AuditLog[]
+}
+
+model AuditLog {
+  id        String   @id @default(uuid())
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  action    String
+  details   Json?
+  ipAddress String?
+  createdAt DateTime @default(now())
+}
+

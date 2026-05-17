@@ -1,0 +1,17 @@
+import { Hono } from 'hono';
+import { authController } from '../controllers/auth.controller';
+import { requireAuth } from '../middleware/auth.middleware';
+import { authRateLimiter } from '../middleware/rate-limit.middleware';
+
+const authRoutes = new Hono();
+
+authRoutes.post('/register', authRateLimiter, c => authController.register(c));
+authRoutes.post('/login', authRateLimiter, c => authController.login(c));
+authRoutes.post('/logout', c => authController.logout(c));
+authRoutes.get('/verify-email', c => authController.verifyEmail(c));
+
+// Protected routes
+authRoutes.get('/me', requireAuth, c => authController.me(c));
+authRoutes.put('/profile', requireAuth, c => authController.updateProfile(c));
+
+export default authRoutes;
