@@ -18,10 +18,24 @@ const envSchema = z.object({
   SMTP_FROM: z.string().email(),
   CLOUDINARY_CLOUD_NAME: z.string().optional(),
   CLOUDINARY_API_KEY: z.string().optional(),
-  CLOUDINARY_API_SECRET: z.string().optional()
+  CLOUDINARY_API_SECRET: z.string().optional(),
+  MAILTRAP_API_TOKEN: z.string().optional(),
+  MAILTRAP_INBOX_ID: z.string().optional()
 });
 
-const _env = envSchema.safeParse(process.env);
+// Pre-process process.env to defensively strip any surrounding quotes automatically applied by Railway/cloud hosting
+const cleanProcessEnv = Object.fromEntries(
+  Object.entries(process.env).map(([key, value]) => {
+    if (typeof value === 'string') {
+      // Remove leading and trailing double or single quotes
+      const cleaned = value.replace(/^["']|["']$/g, '');
+      return [key, cleaned];
+    }
+    return [key, value];
+  })
+);
+
+const _env = envSchema.safeParse(cleanProcessEnv);
 
 if (!_env.success) {
   console.error('❌ Invalid environment variables:');

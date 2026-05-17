@@ -6,7 +6,7 @@ class EmailService {
 
   constructor() {
     // Only initialize SMTP if there's no API Token (or for fallback)
-    if (!process.env.MAILTRAP_API_TOKEN) {
+    if (!env.MAILTRAP_API_TOKEN) {
       this.transporter = nodemailer.createTransport({
         host: env.SMTP_HOST,
         port: env.SMTP_PORT,
@@ -29,10 +29,10 @@ class EmailService {
     `;
 
     // 1. If we have a Mailtrap API Token, use the high-performance HTTP API (bypasses Railway SMTP blocks!)
-    const apiToken = process.env.MAILTRAP_API_TOKEN;
+    const apiToken = env.MAILTRAP_API_TOKEN;
     if (apiToken) {
       try {
-        const inboxId = process.env.MAILTRAP_INBOX_ID;
+        const inboxId = env.MAILTRAP_INBOX_ID;
         const url = inboxId 
           ? `https://sandbox.api.mailtrap.io/api/send/${inboxId}`
           : 'https://send.api.mailtrap.io/api/send';
