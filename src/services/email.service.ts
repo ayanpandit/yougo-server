@@ -1,5 +1,13 @@
 import nodemailer from 'nodemailer';
+import dns from 'dns';
 import { env } from '../config/env';
+
+// Force Node's DNS resolver to prefer IPv4 over IPv6.
+// This prevents ENETUNREACH errors in dual-stack cloud containers (like Railway/Render)
+// that lack IPv6 outbound routing.
+if (typeof dns.setDefaultResultOrder === 'function') {
+  dns.setDefaultResultOrder('ipv4first');
+}
 
 class EmailService {
   private transporter: nodemailer.Transporter;
