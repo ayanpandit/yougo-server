@@ -7,7 +7,7 @@
     "dev": "tsx watch src/index.ts",
     "build": "npx prisma generate && npm run clean && tsc && tsc-alias",
     "start": "node dist/src/index.js",
-    "start:prod": "npx prisma migrate deploy && node dist/src/index.js",
+    "start:prod": "node dist/src/index.js",
     "clean": "rm -rf dist",
     "lint": "eslint \"src/**/*.ts\"",
     "lint:fix": "eslint \"src/**/*.ts\" --fix",
