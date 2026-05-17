@@ -11,25 +11,18 @@ const envSchema = z.object({
   DATABASE_URL: z.string().url(),
   JWT_SECRET: z.string().min(10),
   FRONTEND_URL: z.string().url(),
-  SMTP_HOST: z.string().min(1),
-  SMTP_PORT: z.coerce.number().default(587),
-  SMTP_USER: z.string().min(1),
-  SMTP_PASS: z.string().min(1),
-  SMTP_FROM: z.string().email(),
+  RESEND_API_KEY: z.string().min(1),
+  EMAIL_FROM: z.string().min(1).default('YouGO <onboarding@resend.dev>'),
   CLOUDINARY_CLOUD_NAME: z.string().optional(),
   CLOUDINARY_API_KEY: z.string().optional(),
-  CLOUDINARY_API_SECRET: z.string().optional(),
-  MAILTRAP_API_TOKEN: z.string().optional(),
-  MAILTRAP_INBOX_ID: z.string().optional()
+  CLOUDINARY_API_SECRET: z.string().optional()
 });
 
-// Pre-process process.env to defensively strip any surrounding quotes automatically applied by Railway/cloud hosting
+// Defensively strip surrounding quotes that some cloud hosts (e.g. Railway) may inject
 const cleanProcessEnv = Object.fromEntries(
   Object.entries(process.env).map(([key, value]) => {
     if (typeof value === 'string') {
-      // Remove leading and trailing double or single quotes
-      const cleaned = value.replace(/^["']|["']$/g, '');
-      return [key, cleaned];
+      return [key, value.replace(/^["']|["']$/g, '')];
     }
     return [key, value];
   })

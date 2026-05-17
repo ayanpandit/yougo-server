@@ -8,18 +8,25 @@ This provides full TypeScript autocomplete for `env.VARIABLE_NAME` across the en
 
 ## Required Variables
 
-- `PORT` (number): The port the Hono server listens on.
-- `NODE_ENV` (development | production | test): Environment context.
-- `DATABASE_URL` (url): PostgreSQL connection string.
-- `JWT_SECRET` (string, min 10 chars): Cryptographic key for signing tokens.
-- `FRONTEND_URL` (url): Allowed origin for CORS and CSRF.
-- `SMTP_HOST` (string): SMTP server host (e.g., Mailtrap, AWS SES).
-- `SMTP_PORT` (number): SMTP port.
-- `SMTP_USER` (string): SMTP username.
-- `SMTP_PASS` (string): SMTP password.
-- `SMTP_FROM` (email): Sender email address.
+| Variable | Type | Description |
+|---|---|---|
+| `PORT` | number | The port the Hono server listens on (default: `8080`). |
+| `NODE_ENV` | enum | `development`, `production`, or `test`. |
+| `DATABASE_URL` | url | PostgreSQL connection string. |
+| `JWT_SECRET` | string (min 10) | Cryptographic key for signing session tokens. |
+| `FRONTEND_URL` | url | Allowed origin for CORS and CSRF. |
+| `RESEND_API_KEY` | string | API key from [Resend](https://resend.com) for transactional emails. |
+| `EMAIL_FROM` | string | Sender identity (default: `YouGO <onboarding@resend.dev>`). |
+
+## Optional Variables
+
+| Variable | Type | Description |
+|---|---|---|
+| `CLOUDINARY_CLOUD_NAME` | string | Cloudinary cloud name for profile image uploads. |
+| `CLOUDINARY_API_KEY` | string | Cloudinary API key. |
+| `CLOUDINARY_API_SECRET` | string | Cloudinary API secret. |
 
 ## Local Setup
 1. Copy `.env.example` to `.env`.
-2. Fill in the required secrets (e.g., a strong `JWT_SECRET`).
+2. Fill in the required secrets (e.g., a strong `JWT_SECRET`, your `RESEND_API_KEY`).
 3. Boot the application.

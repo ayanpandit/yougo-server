@@ -29,9 +29,9 @@ class AuthService {
       emailVerificationToken: verificationToken
     });
 
-    // Fire-and-forget the email verification in the background, logging any SMTP errors
+    // Fire-and-forget the email verification in the background
     emailService.sendVerificationEmail(user.email, verificationToken).catch(err => {
-      console.error('[AuthService] SMTP verification email failed to send:', err);
+      console.error('[AuthService] Verification email failed to send:', err);
     });
 
     // Return user without passwordHash

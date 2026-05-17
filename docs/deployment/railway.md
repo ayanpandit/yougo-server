@@ -25,10 +25,11 @@ We use an explicit Infrastructure-as-Code approach via the `railway.json` file. 
 | `DATABASE_URL` | Connects to your Railway Postgres instance. Railway provides this automatically as `$DATABASE_URL` if linked. |
 | `FRONTEND_URL` | Set to your Vercel/Netlify frontend URL (e.g., `https://yougo.vercel.app`). Used for strict CORS and CSRF protection. |
 | `JWT_SECRET` | A secure, random 64-character string used to cryptographically sign session tokens. |
-| `SMTP_HOST` | Your production mail server host. |
-| `SMTP_USER` | Your production mail server username. |
-| `SMTP_PASS` | Your production mail server password. |
-| `SMTP_FROM` | `noreply@yougo.app` or similar verified domain email. |
+| `RESEND_API_KEY` | Your API key from [Resend](https://resend.com). Used for transactional email delivery (verification, password reset). |
+| `EMAIL_FROM` | Sender identity string, e.g. `YouGO <noreply@yourdomain.com>`. Defaults to `YouGO <onboarding@resend.dev>` for testing. |
+| `CLOUDINARY_CLOUD_NAME` | *(Optional)* Cloudinary cloud name for profile image uploads. |
+| `CLOUDINARY_API_KEY` | *(Optional)* Cloudinary API key. |
+| `CLOUDINARY_API_SECRET` | *(Optional)* Cloudinary API secret. |
 
 ## Production Start Command
 The `npm run start:prod` command automatically runs `npx prisma migrate deploy` before executing the server logic. This is critical for CI/CD environments as it ensures your production database schema is strictly synchronized with your codebase prior to receiving web traffic.
