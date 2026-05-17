@@ -1,25 +1,25 @@
 import nodemailer from 'nodemailer';
-import dns from 'dns';
 import { env } from '../config/env';
-
-// Force Node's DNS resolver to prefer IPv4 over IPv6.
-// This prevents ENETUNREACH errors in dual-stack cloud containers (like Railway/Render)
-// that lack IPv6 outbound routing.
-if (typeof dns.setDefaultResultOrder === 'function') {
-  dns.setDefaultResultOrder('ipv4first');
-}
 
 class EmailService {
   private transporter: nodemailer.Transporter;
 
   constructor() {
+    // We drop the "service: 'gmail'" shortcut to gain full control over the socket options.
+    // By explicitly setting host, port, and most importantly 'family: 4', we forcefully 
+    // instruct Node.js to connect to Gmail's IPv4 address.
+    // This perfectly resolves the ENETUNREACH IPv6 bug on cloud containers (like Railway).
     this.transporter = nodemailer.createTransport({
-      service: 'gmail',
+      host: 'smtp.gmail.com',
+      port: 465,
+      secure: true,
       auth: {
         user: env.GMAIL_USER,
         pass: env.GMAIL_APP_PASS
-      }
-    });
+      },
+      // Force IPv4
+      family: 4
+    } as any);
   }
 
   async sendVerificationEmail(to: string, token: string) {
