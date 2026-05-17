@@ -13,5 +13,6 @@ authRoutes.get('/verify-email', c => authController.verifyEmail(c));
 // Protected routes
 authRoutes.get('/me', requireAuth, c => authController.me(c));
 authRoutes.put('/profile', requireAuth, c => authController.updateProfile(c));
+authRoutes.post('/profile/image', requireAuth, c => authController.uploadProfileImage(c));
 
 export default authRoutes;

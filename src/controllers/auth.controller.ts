@@ -4,6 +4,9 @@ import { verify } from 'hono/jwt';
 import { authService } from '../services/auth.service';
 import { env } from '../config/env';
 import { registerSchema, loginSchema, verifyEmailSchema, updateProfileSchema } from '../validators/auth.validator';
+import { cloudinaryService } from '../services/cloudinary.service';
+import { BadRequestError } from '../utils/errors';
+import { userRepository } from '../repositories/user.repository';
 
 export class AuthController {
   async register(c: Context) {
@@ -97,6 +100,34 @@ export class AuthController {
       status: 'success',
       message: 'Profile updated successfully',
       data: { user: safeUser }
+    });
+  }
+
+  async uploadProfileImage(c: Context) {
+    const user = c.get('user');
+    const body = await c.req.parseBody();
+    const file = body.image;
+
+    if (!file || !(file instanceof File)) {
+      throw new BadRequestError('No image file provided');
+    }
+
+    if (!file.type.startsWith('image/')) {
+      throw new BadRequestError('Uploaded file must be a valid image');
+    }
+
+    const arrayBuffer = await file.arrayBuffer();
+    const buffer = Buffer.from(arrayBuffer);
+
+    const imageUrl = await cloudinaryService.uploadImage(buffer, file.type);
+
+    const updatedUser = await userRepository.update(user.id, { image: imageUrl });
+    const { passwordHash: _, emailVerificationToken: __, ...safeUser } = updatedUser;
+
+    return c.json({
+      status: 'success',
+      message: 'Profile image uploaded successfully',
+      data: { imageUrl, user: safeUser }
     });
   }
 }
