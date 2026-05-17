@@ -15,11 +15,8 @@ This provides full TypeScript autocomplete for `env.VARIABLE_NAME` across the en
 | `DATABASE_URL` | url | PostgreSQL connection string. |
 | `JWT_SECRET` | string (min 10) | Cryptographic key for signing session tokens. |
 | `FRONTEND_URL` | url | Allowed origin for CORS and CSRF. |
-| `SMTP_HOST` | string | SMTP server host (e.g. `sandbox.smtp.mailtrap.io`). |
-| `SMTP_PORT` | number | SMTP port (e.g. `2525`, `587`). |
-| `SMTP_USER` | string | SMTP username. |
-| `SMTP_PASS` | string | SMTP password. |
-| `SMTP_FROM` | string | Verified sender email address (e.g. `noreply@yougo.com`). |
+| `GMAIL_USER` | string | Your Gmail address (e.g. `support.yougo@gmail.com`). |
+| `GMAIL_APP_PASS` | string | Your 16-character Google App Password (e.g. `abcd efgh ijkl mnop`). |
 
 ## Optional Variables
 

@@ -6,15 +6,10 @@ class EmailService {
 
   constructor() {
     this.transporter = nodemailer.createTransport({
-      host: env.SMTP_HOST,
-      port: env.SMTP_PORT,
-      secure: env.SMTP_PORT === 465, // true for port 465, false for other ports
+      service: 'gmail',
       auth: {
-        user: env.SMTP_USER,
-        pass: env.SMTP_PASS
-      },
-      tls: {
-        rejectUnauthorized: false // Prevents connection failures with self-signed certificates
+        user: env.GMAIL_USER,
+        pass: env.GMAIL_APP_PASS
       }
     });
   }
@@ -23,7 +18,7 @@ class EmailService {
     const verificationUrl = `${env.FRONTEND_URL}/verify-email?token=${token}`;
 
     const mailOptions = {
-      from: env.SMTP_FROM,
+      from: `"YouGO" <${env.GMAIL_USER}>`,
       to,
       subject: 'Verify your YouGO Account',
       html: `
