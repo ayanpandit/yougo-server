@@ -39,7 +39,7 @@ export class AuthController {
     return c.json({
       status: 'success',
       message: 'Logged in successfully',
-      data: { user }
+      data: { user, token }
     });
   }
 

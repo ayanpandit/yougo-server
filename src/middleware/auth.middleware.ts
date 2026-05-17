@@ -6,7 +6,15 @@ import { UnauthorizedError } from '../utils/errors';
 import { userRepository } from '../repositories/user.repository';
 
 export const requireAuth = async (c: Context, next: Next) => {
-  const token = getCookie(c, 'jwt');
+  let token = getCookie(c, 'jwt');
+
+  // Fallback to Authorization Header (essential for cross-origin hosting like Vercel + Railway)
+  if (!token) {
+    const authHeader = c.req.header('Authorization');
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+      token = authHeader.substring(7);
+    }
+  }
 
   if (!token) {
     throw new UnauthorizedError('Not logged in');
