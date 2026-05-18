@@ -1,35 +1,21 @@
-import nodemailer from 'nodemailer';
 import { env } from '../config/env';
 
 class EmailService {
-  private transporter: nodemailer.Transporter;
-
-  constructor() {
-    // We drop the "service: 'gmail'" shortcut to gain full control over the socket options.
-    // By explicitly setting host, port, and most importantly 'family: 4', we forcefully 
-    // instruct Node.js to connect to Gmail's IPv4 address.
-    // This perfectly resolves the ENETUNREACH IPv6 bug on cloud containers (like Railway).
-    this.transporter = nodemailer.createTransport({
-      host: 'smtp.gmail.com',
-      port: 465,
-      secure: true,
-      auth: {
-        user: env.GMAIL_USER,
-        pass: env.GMAIL_APP_PASS
-      },
-      // Force IPv4
-      family: 4
-    } as any);
-  }
-
   async sendVerificationEmail(to: string, token: string) {
     const verificationUrl = `${env.FRONTEND_URL}/verify-email?token=${token}`;
 
-    const mailOptions = {
-      from: `"YouGO" <${env.GMAIL_USER}>`,
-      to,
+    const payload = {
+      sender: {
+        name: 'YouGO',
+        email: env.BREVO_SENDER_EMAIL
+      },
+      to: [
+        {
+          email: to
+        }
+      ],
       subject: 'Verify your YouGO Account',
-      html: `
+      htmlContent: `
         <h1>Welcome to YouGO!</h1>
         <p>Please verify your email by clicking the link below:</p>
         <a href="${verificationUrl}">${verificationUrl}</a>
@@ -37,7 +23,28 @@ class EmailService {
       `
     };
 
-    await this.transporter.sendMail(mailOptions);
+    try {
+      const response = await fetch('https://api.brevo.com/v3/smtp/email', {
+        method: 'POST',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+          'api-key': env.BREVO_API_KEY
+        },
+        body: JSON.stringify(payload)
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error('Failed to send email via Brevo:', errorData);
+        throw new Error('Failed to send verification email');
+      }
+
+      console.log(`Verification email successfully sent to ${to} via Brevo`);
+    } catch (error) {
+      console.error('Email sending error:', error);
+      throw error;
+    }
   }
 }
 
