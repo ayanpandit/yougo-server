@@ -25,8 +25,8 @@ We use an explicit Infrastructure-as-Code approach via the `railway.json` file. 
 | `DATABASE_URL` | Connects to your Railway Postgres instance. Railway provides this automatically as `$DATABASE_URL` if linked. |
 | `FRONTEND_URL` | Set to your Vercel/Netlify frontend URL (e.g., `https://yugo-web-blond.vercel.app`). Used for strict CORS and CSRF protection. |
 | `JWT_SECRET` | A secure, random 64-character string used to cryptographically sign session tokens. |
-| `GMAIL_USER` | Your Gmail address (e.g. `support.yougo@gmail.com`). |
-| `GMAIL_APP_PASS` | Your 16-character Google App Password (e.g. `abcd efgh ijkl mnop`). |
+| `BREVO_API_KEY` | API key generated from Brevo. Required to bypass SMTP blocking. |
+| `BREVO_SENDER_EMAIL` | A verified sender email in your Brevo account (e.g., `support.yougo@gmail.com`). |
 | `CLOUDINARY_CLOUD_NAME` | *(Optional)* Cloudinary cloud name for profile image uploads. |
 | `CLOUDINARY_API_KEY` | *(Optional)* Cloudinary API key. |
 | `CLOUDINARY_API_SECRET` | *(Optional)* Cloudinary API secret. |

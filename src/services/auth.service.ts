@@ -129,6 +129,52 @@ class AuthService {
 
     return await userRepository.update(userId, updateData);
   }
+
+  async forgotPassword(email: string) {
+    const user = await userRepository.findByEmail(email);
+    
+    // User enumeration protection: return silently if user not found
+    if (!user) {
+      return;
+    }
+
+    const resetToken = crypto.randomBytes(32).toString('hex');
+    const hashedToken = crypto.createHash('sha256').update(resetToken).digest('hex');
+    const expiry = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
+
+    await userRepository.update(user.id, {
+      passwordResetToken: hashedToken,
+      passwordResetExpires: expiry
+    });
+
+    // Send the unhashed token in the email
+    emailService.sendPasswordResetEmail(user.email, resetToken).catch(err => {
+      console.error('[AuthService] Forgot password email failed to send:', err);
+    });
+  }
+
+  async resetPassword(token: string, newPassword: string) {
+    const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
+    const user = await userRepository.findByResetToken(hashedToken);
+
+    if (!user || !user.passwordResetExpires || user.passwordResetExpires < new Date()) {
+      throw new BadRequestError('Password reset token is invalid or has expired');
+    }
+
+    const passwordHash = await bcrypt.hash(newPassword, 12);
+
+    await userRepository.update(user.id, {
+      passwordHash,
+      passwordResetToken: null,
+      passwordResetExpires: null,
+      tokenVersion: user.tokenVersion + 1 // Revoke active sessions
+    });
+
+    // Send confirmation email
+    emailService.sendPasswordResetConfirmationEmail(user.email).catch(err => {
+      console.error('[AuthService] Password reset confirmation email failed to send:', err);
+    });
+  }
 }
 
 export const authService = new AuthService();

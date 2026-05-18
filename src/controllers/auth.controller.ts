@@ -3,7 +3,7 @@ import { getCookie, setCookie, deleteCookie } from 'hono/cookie';
 import { verify } from 'hono/jwt';
 import { authService } from '../services/auth.service';
 import { env } from '../config/env';
-import { registerSchema, loginSchema, verifyEmailSchema, updateProfileSchema } from '../validators/auth.validator';
+import { registerSchema, loginSchema, verifyEmailSchema, updateProfileSchema, forgotPasswordSchema, resetPasswordSchema } from '../validators/auth.validator';
 import { cloudinaryService } from '../services/cloudinary.service';
 import { BadRequestError } from '../utils/errors';
 import { userRepository } from '../repositories/user.repository';
@@ -136,6 +136,30 @@ export class AuthController {
       status: 'success',
       message: 'Profile image uploaded successfully',
       data: { imageUrl, user: safeUser }
+    });
+  }
+
+  async forgotPassword(c: Context) {
+    const body = await c.req.json();
+    const data = forgotPasswordSchema.parse(body);
+
+    await authService.forgotPassword(data.email);
+
+    return c.json({
+      status: 'success',
+      message: 'If a matching account exists, a password reset email has been sent.'
+    });
+  }
+
+  async resetPassword(c: Context) {
+    const body = await c.req.json();
+    const data = resetPasswordSchema.parse(body);
+
+    await authService.resetPassword(data.token, data.password);
+
+    return c.json({
+      status: 'success',
+      message: 'Your password has been successfully updated. You can now log in.'
     });
   }
 }

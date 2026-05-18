@@ -9,6 +9,8 @@ authRoutes.post('/register', authRateLimiter, c => authController.register(c));
 authRoutes.post('/login', authRateLimiter, c => authController.login(c));
 authRoutes.post('/logout', c => authController.logout(c));
 authRoutes.get('/verify-email', c => authController.verifyEmail(c));
+authRoutes.post('/forgot-password', authRateLimiter, c => authController.forgotPassword(c));
+authRoutes.post('/reset-password', authRateLimiter, c => authController.resetPassword(c));
 
 // Protected routes
 authRoutes.get('/me', requireAuth, c => authController.me(c));

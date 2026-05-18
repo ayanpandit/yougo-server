@@ -18,6 +18,10 @@ export class UserRepository {
     return prisma.user.findUnique({ where: { emailVerificationToken: token } });
   }
 
+  async findByResetToken(token: string) {
+    return prisma.user.findUnique({ where: { passwordResetToken: token } });
+  }
+
   async create(data: Prisma.UserCreateInput) {
     return prisma.user.create({ data });
   }

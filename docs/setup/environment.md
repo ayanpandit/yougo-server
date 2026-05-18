@@ -15,8 +15,8 @@ This provides full TypeScript autocomplete for `env.VARIABLE_NAME` across the en
 | `DATABASE_URL` | url | PostgreSQL connection string. |
 | `JWT_SECRET` | string (min 10) | Cryptographic key for signing session tokens. |
 | `FRONTEND_URL` | url | Allowed origin for CORS and CSRF. |
-| `GMAIL_USER` | string | Your Gmail address (e.g. `support.yougo@gmail.com`). |
-| `GMAIL_APP_PASS` | string | Your 16-character Google App Password (e.g. `abcd efgh ijkl mnop`). |
+| `BREVO_API_KEY` | string | API key generated from Brevo (SMTP & API settings). |
+| `BREVO_SENDER_EMAIL` | string | A verified sender email in your Brevo account (e.g. `support.yougo@gmail.com`). |
 
 ## Optional Variables
 

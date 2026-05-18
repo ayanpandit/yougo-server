@@ -12,7 +12,7 @@ YouGO uses a highly secure, traditional email/password authentication system bui
   - Password is hashed using `bcryptjs` with a cost factor of `12`.
   - User is created in the database with `isEmailVerified = false`.
   - A 64-character hex cryptographic token is generated.
-  - Nodemailer sends an email containing the verification link.
+  - Brevo's HTTP API (Port 443) sends an email containing the verification link.
 
 ## 2. Email Verification Flow
 - User clicks the link containing the `token` parameter.
@@ -40,6 +40,8 @@ YouGO uses a highly secure, traditional email/password authentication system bui
 - **HttpOnly**: JavaScript cannot read the token, neutralizing XSS token theft.
 - **CSRF Protection**: Because cookies are automatically sent, a CSRF middleware validates the `Origin` header to prevent forged cross-site requests.
 - **Account Locking**: After successive failed attempts, the account is temporarily locked to prevent brute-force and dictionary attacks.
+- **Password Reset Hashing**: Reset tokens are cryptographically generated but stored in the database as a SHA-256 hash. This prevents database leaks from compromising active reset links.
+- **User Enumeration Prevention**: Password reset requests for non-existent emails return a generic successful response to prevent attackers from discovering registered emails.
 
 ## 6. Logout & Session Revocation Flow
 - **Front-End View**: Triggered via sidebar or profile page action buttons.
@@ -57,3 +59,21 @@ YouGO uses a highly secure, traditional email/password authentication system bui
   - The Hono endpoint validates incoming properties using `updateProfileSchema` Zod validation.
   - If a new `username` is provided, it confirms username uniqueness and throws `ConflictError` if already in use.
   - Database is updated, and the new dynamic `user` context is refreshed on the frontend.
+
+## 8. Password Reset Flow
+- **Front-End View**: `/forgot-password` and `/reset-password`
+  - `/forgot-password` prompts for an email and returns a generic success message regardless of email existence.
+  - `/reset-password` displays a form for the new password if a valid, unexpired token is parsed from the URL parameter (`token`).
+- **Process**:
+  - **Request**:
+    - The client sends a `POST` request to `/auth/forgot-password` with the user's `email`.
+    - If the user exists, the server generates a cryptographically secure 64-character hex token, hashes it using SHA-256, and stores the hash and a 1-hour expiry time in the database.
+    - An email is sent via Brevo HTTP API with the reset link containing the unhashed token: `${FRONTEND_URL}/reset-password?token=${token}`.
+  - **Reset**:
+    - The client sends a `POST` request to `/auth/reset-password` with the unhashed `token` and the new `password`.
+    - The server hashes the unhashed token using SHA-256, then queries the database for a user with the matching `passwordResetToken`.
+    - Validates that the token hasn't expired.
+    - Hashes the new password using `bcryptjs` (salt rounds 12).
+    - Updates `passwordHash`, sets token/expiry fields to `null`, and increments `tokenVersion` by 1.
+    - Incrementing `tokenVersion` instantly invalidates all existing JWT sessions on all other devices, ensuring complete security.
+    - Sends a confirmation email indicating that the password was successfully reset.
