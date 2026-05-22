@@ -78,10 +78,10 @@ class AuthService {
     }
 
     const token = await sign(
-      { 
-        sub: user.id, 
+      {
+        sub: user.id,
         tokenVersion: user.tokenVersion,
-        exp: Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 7 
+        exp: Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 7
       },
       env.JWT_SECRET,
       'HS256'
@@ -132,7 +132,7 @@ class AuthService {
 
   async forgotPassword(email: string) {
     const user = await userRepository.findByEmail(email);
-    
+
     // User enumeration protection: return silently if user not found
     if (!user) {
       return;

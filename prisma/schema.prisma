@@ -46,3 +46,28 @@ model AuditLog {
   createdAt DateTime @default(now())
 }
 
+// -----------------------------------------------------------------------------
+// AI Brain Microservice Schema (Trips)
+// -----------------------------------------------------------------------------
+
+enum GenerationStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+}
+
+model Trip {
+  id           String           @id @default(uuid())
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+  status       GenerationStatus @default(PENDING)
+  error        String?          @db.Text
+  generationId String           @unique
+  payload      Json             // Input parameters (POST body DTO)
+  response     Json?            // Output itinerary (repaired completed JSON)
+  type         String           @default("AI_model")
+  metadata     Json?            // Optional intermediate/telemetry steps list!
+
+  @@map("trips")
+}

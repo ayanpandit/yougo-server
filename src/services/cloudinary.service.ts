@@ -42,10 +42,10 @@ class CloudinaryService {
 
     // Create native FormData (since Hono runs on Node 20+, standard global FormData and Blob are built-in!)
     const formData = new FormData();
-    
+
     // Create a Blob from the file buffer to upload it via standard fetch FormData
     const blob = new Blob([new Uint8Array(fileBuffer)], { type: mimeType });
-    
+
     formData.append('file', blob, 'profile_image');
     formData.append('folder', folder);
     formData.append('timestamp', timestamp);
@@ -63,19 +63,19 @@ class CloudinaryService {
       throw new BadRequestError(errorData.error?.message || 'Failed to upload image to Cloudinary');
     }
 
-    const data = await response.json() as any;
+    const data = (await response.json()) as any;
     return data.secure_url;
   }
 
   extractPublicId(url: string): string | null {
     if (!url || !url.includes('res.cloudinary.com')) return null;
-    
+
     try {
       const parts = url.split('/image/upload/');
       if (parts.length < 2) return null;
-      
+
       let path = parts[1];
-      
+
       // Strip out the version number (e.g. v12345678/) if it exists
       if (path.startsWith('v')) {
         const firstSlash = path.indexOf('/');
@@ -83,13 +83,13 @@ class CloudinaryService {
           path = path.substring(firstSlash + 1);
         }
       }
-      
+
       // Strip file extension (.jpg, .png, etc.)
       const lastDot = path.lastIndexOf('.');
       if (lastDot !== -1) {
         path = path.substring(0, lastDot);
       }
-      
+
       return path;
     } catch (error) {
       console.error('[CloudinaryService] Error extracting public ID:', error);
@@ -99,7 +99,7 @@ class CloudinaryService {
 
   async deleteImage(url: string): Promise<boolean> {
     if (!this.isConfigured() || !url) return false;
-    
+
     const publicId = this.extractPublicId(url);
     if (!publicId) return false;
 
@@ -133,7 +133,7 @@ class CloudinaryService {
         return false;
       }
 
-      const result = await response.json() as any;
+      const result = (await response.json()) as any;
       console.log(`[CloudinaryService] Successfully deleted old image: ${publicId}`, result);
       return result.result === 'ok';
     } catch (error) {

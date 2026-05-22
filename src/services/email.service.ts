@@ -20,7 +20,7 @@ class EmailService {
       const response = await fetch('https://api.brevo.com/v3/smtp/email', {
         method: 'POST',
         headers: {
-          'Accept': 'application/json',
+          Accept: 'application/json',
           'Content-Type': 'application/json',
           'api-key': env.BREVO_API_KEY
         },

@@ -24,7 +24,12 @@ export const verifyEmailSchema = z
 export const updateProfileSchema = z
   .object({
     name: z.string().min(2).max(50).optional().nullable(),
-    username: z.string().min(3).max(30).regex(/^[a-zA-Z0-9_]+$/).optional(),
+    username: z
+      .string()
+      .min(3)
+      .max(30)
+      .regex(/^[a-zA-Z0-9_]+$/)
+      .optional(),
     bio: z.string().max(150).optional().nullable(),
     gender: z.string().optional().nullable(),
     dateOfBirth: z.string().optional().nullable(),
@@ -57,4 +62,3 @@ export const resetPasswordSchema = z
 
 export type ForgotPasswordInput = z.infer<typeof forgotPasswordSchema>;
 export type ResetPasswordInput = z.infer<typeof resetPasswordSchema>;
-

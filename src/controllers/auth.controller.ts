@@ -3,7 +3,14 @@ import { getCookie, setCookie, deleteCookie } from 'hono/cookie';
 import { verify } from 'hono/jwt';
 import { authService } from '../services/auth.service';
 import { env } from '../config/env';
-import { registerSchema, loginSchema, verifyEmailSchema, updateProfileSchema, forgotPasswordSchema, resetPasswordSchema } from '../validators/auth.validator';
+import {
+  registerSchema,
+  loginSchema,
+  verifyEmailSchema,
+  updateProfileSchema,
+  forgotPasswordSchema,
+  resetPasswordSchema
+} from '../validators/auth.validator';
 import { cloudinaryService } from '../services/cloudinary.service';
 import { BadRequestError } from '../utils/errors';
 import { userRepository } from '../repositories/user.repository';
@@ -58,7 +65,7 @@ export class AuthController {
         // Token invalid/expired, proceed to delete cookie
       }
     }
-    
+
     deleteCookie(c, 'jwt', { path: '/' });
     return c.json({
       status: 'success',
