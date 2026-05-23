@@ -15,7 +15,8 @@ const envSchema = z.object({
   BREVO_SENDER_EMAIL: z.string().email(),
   CLOUDINARY_CLOUD_NAME: z.string().optional(),
   CLOUDINARY_API_KEY: z.string().optional(),
-  CLOUDINARY_API_SECRET: z.string().optional()
+  CLOUDINARY_API_SECRET: z.string().optional(),
+  BRAIN_SERVICE_URL: z.string().url().default('http://localhost:8001')
 });
 
 // Pre-process process.env to defensively strip any surrounding quotes automatically applied by Railway/cloud hosting

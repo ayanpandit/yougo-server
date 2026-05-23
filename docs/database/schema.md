@@ -24,7 +24,8 @@ Stores significant system and user actions for security monitoring and admin tra
 ### `Trip` (AI Brain Microservice)
 Stores completely generated AI travel itineraries.
 - **Data**: `payload` (input preferences), `response` (validated day-by-day JSON plans), `metadata` (step execution logs).
-- **Architecture**: `yougo-server` is the singular owner of this schema. The `yougo_brain` AI microservice acts as a stateless client that reads and writes to this table directly via the centralized `DATABASE_URL`.
+- **Ownership**: Every trip belongs to an authenticated user (`userId` relation to `User`).
+- **Architecture**: `yougo-server` orchestrates trip creation and ownership. The `yougo_brain` AI microservice acts as a stateless generation engine that processes jobs and updates this table via the centralized `DATABASE_URL`.
 
 ## Migrations Workflow
 - **Development**: Use `npx prisma db push` to quickly sync the Prisma schema to the development database without creating migration files.

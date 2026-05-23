@@ -34,6 +34,7 @@ model User {
   createdAt              DateTime  @default(now())
   updatedAt              DateTime  @updatedAt
   AuditLog               AuditLog[]
+  trips                  Trip[]
 }
 
 model AuditLog {
@@ -68,6 +69,8 @@ model Trip {
   response     Json?            // Output itinerary (repaired completed JSON)
   type         String           @default("AI_model")
   metadata     Json?            // Optional intermediate/telemetry steps list!
+  userId       String
+  user         User             @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("trips")
 }

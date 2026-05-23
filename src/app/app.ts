@@ -4,6 +4,7 @@ import { logger } from 'hono/logger';
 import { csrf } from 'hono/csrf';
 import { secureHeaders } from 'hono/secure-headers';
 import authRoutes from '../routes/auth.routes';
+import tripRoutes from '../routes/trip.routes';
 import { errorHandler, notFoundHandler } from '../middleware/error.middleware';
 import { env } from '../config/env';
 
@@ -29,6 +30,7 @@ app.use(
 
 // Routes
 app.route('/auth', authRoutes);
+app.route('/api/v1/generate', tripRoutes);
 
 // Health Check
 app.get('/health', c => {
