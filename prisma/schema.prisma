@@ -72,5 +72,15 @@ model Trip {
   userId       String
   user         User             @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+  // Extracted Feed Columns
+  coverImage     String?
+  tripType       String?
+  totalDays      Int?
+  destination    String?
+  baseCurrency   String?
+  totalPersons   Int?
+  experienceType String?
+  perPersonCost  Int?
+
   @@map("trips")
 }
