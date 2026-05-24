@@ -8,6 +8,7 @@ export class TripRepository {
       },
       select: {
         id: true,
+        generationId: true,
         coverImage: true,
         tripType: true,
         destination: true,

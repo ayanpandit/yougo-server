@@ -5,7 +5,7 @@ export class FeedService {
     const trips = await tripRepository.findFeedTrips();
 
     return trips.map(trip => ({
-      tripId: trip.id,
+      tripId: trip.generationId,
       coverImage: trip.coverImage,
       tripType: trip.tripType,
       destination: trip.destination,

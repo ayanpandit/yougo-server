@@ -52,6 +52,7 @@ model AuditLog {
 // -----------------------------------------------------------------------------
 
 enum GenerationStatus {
+  DRAFT
   PENDING
   PROCESSING
   COMPLETED

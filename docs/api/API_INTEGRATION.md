@@ -217,3 +217,143 @@ if (!res.ok) {
 // Proceed with success
 const generationId = result.data.generationId;
 ```
+
+---
+
+## 6. Manual Trip Creation & Image Uploads (NEW)
+
+### 1. Cloudinary File Uploads
+Allows manual trip creators to upload raw binaries directly to Cloudinary and retrieve secure image URLs for trip visual summaries.
+
+- **Endpoint**: `POST /api/v1/generate/manual/upload-image`
+- **Auth Required**: ✅ Yes
+- **Content-Type**: `multipart/form-data`
+- **Body Parameters**:
+  - `image`: Raw Image file binary.
+- **Response**:
+  ```json
+  {
+    "status": "success",
+    "data": {
+      "url": "https://res.cloudinary.com/..."
+    }
+  }
+  ```
+
+### 2. Manual Trip Creation (Save Draft / Publish)
+Allows full relational relational-free, flat manual trip inserts or draft saves matching identical canonical response schemas.
+
+- **Endpoint**: `POST /api/v1/generate/manual`
+- **Auth Required**: ✅ Yes
+- **Payload Structure**:
+  ```json
+  {
+    "generationId": "optional-uuid-to-overwrite-existing-draft",
+    "status": "DRAFT", // or "COMPLETED" to publish
+    "destination": "Manali",
+    "tripType": "Round Trip",
+    "totalDays": 2,
+    "totalPersons": 2,
+    "experienceType": "Adventure",
+    "baseCurrency": "INR (₹)",
+    "imageUrl": "https://res.cloudinary.com/...",
+    "origin": "Ghaziabad",
+    "startDate": "2026-06-15",
+    "budgetINR": 45000,
+    "luxuryLevel": "moderate",
+    "travelStyle": "adventure",
+    "foodPreference": "veg",
+    "isRoundTrip": true,
+    "travelMedium": {
+      "bus": { "selected": false },
+      "car": { "selected": true, "type": "suv", "ownership": "rented" },
+      "bike": { "selected": false },
+      "train": { "selected": false },
+      "flights": { "selected": false },
+      "mixed_best_suitable": false
+    },
+    "travelers": [
+      { "sex": "M", "age": 21 },
+      { "sex": "M", "age": 22 }
+    ],
+    "days": [
+      {
+        "day": 1,
+        "title": "The Ascent",
+        "date": "15/06/2026",
+        "route": "Ghaziabad, Manali",
+        "distance": "540 km",
+        "travelTime": "12.5 hrs",
+        "altitudeSeaLevel": "2050m",
+        "dailyPacing": "Moderate",
+        "experienceDescription": "Scenic hill drives.",
+        "accommodation": {
+          "hotelName": "Hotel Grand View",
+          "whyRecommended": "Valleys views",
+          "bookingPlatform": "Booking.com",
+          "bookingLink": "https://www.booking.com/...",
+          "pricePerPersonINR": 1600
+        },
+        "transportDetails": {
+          "type": "car",
+          "subType": "Mahindra Thar",
+          "flightOrTrainNumber": "Not Applicable",
+          "departureTime": "04:30 AM",
+          "arrivalTime": "05:00 PM"
+        },
+        "predictedWeather": {
+          "conditions": "Clear Skies",
+          "temperatureLow": "12°C",
+          "temperatureHigh": "22°C"
+        },
+        "dailyActivities": [
+          { "name": "Hadimba temple", "detail": "Temple visit", "estimatedINR": 500 }
+        ],
+        "costBreakdown": {
+          "transportBaseINR": 3500,
+          "fuelINR": 4500,
+          "tollsINR": 650,
+          "accommodationINR": 1600,
+          "activitiesINR": 500,
+          "foodINR": { "breakfast": 300, "lunch": 700, "dinner": 1200 }
+        }
+      }
+    ]
+  }
+  ```
+- **Response**:
+  ```json
+  {
+    "status": "success",
+    "data": {
+      "id": "db-record-id",
+      "generationId": "uuid-for-drafts-overwrites",
+      "status": "DRAFT",
+      "destination": "Manali",
+      "totalDays": 2,
+      "perPersonCost": 22350
+    }
+  }
+  ```
+
+### 3. Load Active User Drafts
+Fetches a list of all active drafts saved by the currently authenticated user.
+
+- **Endpoint**: `GET /api/v1/generate/manual/drafts`
+- **Auth Required**: ✅ Yes
+- **Response**:
+  ```json
+  {
+    "status": "success",
+    "data": [
+      {
+        "generationId": "uuid",
+        "status": "DRAFT",
+        "destination": "Manali",
+        "totalDays": 2,
+        "updatedAt": "2026-05-24T17:31:00.000Z",
+        "payload": { ... } // Raw intake details
+      }
+    ]
+  }
+  ```

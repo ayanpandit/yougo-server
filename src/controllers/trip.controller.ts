@@ -3,6 +3,8 @@ import { prisma } from '../db/prisma';
 import { env } from '../config/env';
 import { randomUUID } from 'crypto';
 import { BadRequestError, NotFoundError, UnauthorizedError } from '../utils/errors';
+import { manualTripService } from '../services/manual-trip.service';
+import { cloudinaryService } from '../services/cloudinary.service';
 
 export class TripController {
   async generate(c: Context) {
@@ -89,18 +91,24 @@ export class TripController {
       throw new BadRequestError('Generation ID is required');
     }
 
-    // Retrieve the trip and assert ownership
-    const trip = await prisma.trip.findUnique({
+    // Retrieve the trip and assert ownership (fallback to id check)
+    let trip = await prisma.trip.findUnique({
       where: { generationId: id },
     });
+
+    if (!trip) {
+      trip = await prisma.trip.findUnique({
+        where: { id },
+      });
+    }
 
     if (!trip) {
       throw new NotFoundError(`Generation job with ID "${id}" not found`);
     }
 
-    // Secure ownership assertion
-    if (trip.userId !== user.id) {
-      throw new UnauthorizedError('Access Denied: You do not own this expedition.');
+    // Secure ownership assertion: only require ownership for incomplete/draft trips
+    if (trip.status !== 'COMPLETED' && trip.userId !== user.id) {
+      throw new UnauthorizedError('Access Denied: You do not own this in-progress expedition.');
     }
 
     // Match exact telemetry logs format returned previously
@@ -129,6 +137,94 @@ export class TripController {
     return c.json({
       status: 'success',
       data: [item],
+    });
+  }
+
+  async createManual(c: Context) {
+    const user = c.get('user');
+    if (!user) {
+      throw new UnauthorizedError('Unauthorized access');
+    }
+
+    const body = await c.req.json();
+    if (!body) {
+      throw new BadRequestError('Request body is required.');
+    }
+
+    // 1. Validate based on status
+    if (body.status === 'COMPLETED') {
+      manualTripService.validatePublish(body);
+    } else {
+      // For DRAFT: require at least a destination name to start
+      if (!body.destination || body.destination.trim() === '') {
+        throw new BadRequestError('Destination is required to save a draft.');
+      }
+    }
+
+    // 2. Process and save the manual trip
+    const trip = await manualTripService.saveManualTrip(user.id, body);
+
+    return c.json({
+      status: 'success',
+      message: body.status === 'COMPLETED' ? 'Manual trip published successfully' : 'Draft saved successfully',
+      data: {
+        id: trip.id,
+        generationId: trip.generationId,
+        status: trip.status,
+      }
+    });
+  }
+
+  async getUserDrafts(c: Context) {
+    const user = c.get('user');
+    if (!user) {
+      throw new UnauthorizedError('Unauthorized access');
+    }
+
+    const drafts = await prisma.trip.findMany({
+      where: {
+        userId: user.id,
+        status: 'DRAFT',
+        type: 'user'
+      },
+      orderBy: {
+        updatedAt: 'desc'
+      }
+    });
+
+    return c.json({
+      status: 'success',
+      data: drafts
+    });
+  }
+
+  async uploadTripImage(c: Context) {
+    const user = c.get('user');
+    if (!user) {
+      throw new UnauthorizedError('Unauthorized access');
+    }
+
+    const body = await c.req.parseBody();
+    const file = body.image;
+
+    if (!file || !(file instanceof File)) {
+      throw new BadRequestError('No image file provided');
+    }
+
+    if (!file.type.startsWith('image/')) {
+      throw new BadRequestError('Uploaded file must be a valid image');
+    }
+
+    const arrayBuffer = await file.arrayBuffer();
+    const buffer = Buffer.from(arrayBuffer);
+
+    const imageUrl = await cloudinaryService.uploadImage(buffer, file.type);
+
+    return c.json({
+      status: 'success',
+      data: {
+        url: imageUrl
+      }
     });
   }
 }
