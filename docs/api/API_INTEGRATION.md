@@ -357,3 +357,67 @@ Fetches a list of all active drafts saved by the currently authenticated user.
     ]
   }
   ```
+
+---
+
+## 7. Social Graph & Follow System
+
+### 1. Toggle Follow
+Provides Instagram-style follow/unfollow functionality. If you are already following the user, hitting this endpoint will unfollow them.
+
+- **Endpoint**: `POST /api/v1/users/:userId/follow`
+- **Auth Required**: ✅ Yes
+- **Response**:
+  ```json
+  {
+    "status": "success",
+    "data": {
+      "following": true,
+      "followersCount": 120
+    }
+  }
+  ```
+
+### 2. Get Followers / Following
+Fetches a list of profiles for the social graph.
+
+- **Endpoint**: `GET /api/v1/users/:userId/followers` (and `/following`)
+- **Auth Required**: ❌ No
+- **Response Shape**:
+  ```json
+  {
+    "status": "success",
+    "data": [
+      {
+        "id": "uuid",
+        "username": "wanderlust99",
+        "name": "Wanderlust",
+        "image": "https://res.cloudinary.com/..."
+      }
+    ]
+  }
+  ```
+
+### 3. Public Profile Data
+Fetches comprehensive profile details along with dynamic follow metrics.
+
+- **Endpoint**: `GET /profile/:username`
+- **Auth Required**: Optional (If sent, the backend computes `isFollowing` from your perspective)
+- **Response Shape**:
+  ```json
+  {
+    "status": "success",
+    "data": {
+      "user": {
+        "id": "uuid",
+        "username": "wanderlust99",
+        "name": "Wanderlust",
+        "image": "https://...",
+        "bio": "Travel enthusiest"
+      },
+      "followersCount": 120,
+      "followingCount": 47,
+      "isFollowing": false
+    }
+  }
+  ```

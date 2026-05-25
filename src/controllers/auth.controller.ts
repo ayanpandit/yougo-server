@@ -87,11 +87,24 @@ export class AuthController {
 
   async me(c: Context) {
     const user = c.get('user');
-    const { passwordHash: _, emailVerificationToken: __, ...safeUser } = user;
+    const { passwordHash: _, emailVerificationToken: __, passwordResetToken: ___, ...safeUser } = user;
+
+    const { prisma } = require('../db/prisma'); // safe dynamic import
+
+    const [followersCount, followingCount] = await Promise.all([
+      prisma.follow.count({ where: { followingId: user.id } }),
+      prisma.follow.count({ where: { followerId: user.id } }),
+    ]);
 
     return c.json({
       status: 'success',
-      data: { user: safeUser }
+      data: { 
+        user: {
+          ...safeUser,
+          followersCount,
+          followingCount
+        }
+      }
     });
   }
 

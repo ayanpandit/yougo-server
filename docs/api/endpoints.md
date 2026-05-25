@@ -32,6 +32,19 @@ Fetches a highly optimized list of recently generated travel itineraries for the
   }
   ```
 
+### Public Profile API
+Fetches a user's comprehensive profile data including follower metrics.
+- **URL**: `/profile/:username`
+- **Method**: `GET`
+- **Auth Required**: Optional (Determines `isFollowing` state)
+- **Response**: Returns lightweight user details alongside `followersCount`, `followingCount`, and `isFollowing`.
+
+### Social Following
+Fetches lightweight lists of users in the social graph.
+- **URL**: `/api/v1/users/:userId/followers` | `/api/v1/users/:userId/following`
+- **Method**: `GET`
+- **Auth Required**: No
+
 ## 🔐 Protected Endpoints
 
 ### Generate AI Trip
@@ -46,3 +59,10 @@ Retrieves the real-time execution telemetry and final JSON output of a trip.
 - **URL**: `/api/v1/generate/:id`
 - **Method**: `GET`
 - **Auth Required**: Yes (Bearer Token). Must be the owner of the trip.
+
+### Toggle Follow
+Toggles the follow state for a target user.
+- **URL**: `/api/v1/users/:userId/follow`
+- **Method**: `POST`
+- **Auth Required**: Yes (Bearer Token)
+- **Response**: Returns the updated `following` status and `followersCount`.

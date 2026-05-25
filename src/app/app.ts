@@ -8,6 +8,7 @@ import tripRoutes from '../routes/trip.routes';
 import feedRoutes from '../routes/feed.routes';
 import profileRoutes from '../routes/profile.routes';
 import likeRoutes from '../routes/like.routes';
+import followRoutes from '../routes/follow.routes';
 import { errorHandler, notFoundHandler } from '../middleware/error.middleware';
 import { env } from '../config/env';
 
@@ -38,6 +39,7 @@ app.route('/feed', feedRoutes);
 app.route('/api/v1/feed', feedRoutes);
 app.route('/profile', profileRoutes);
 app.route('/api/v1/trips', likeRoutes);
+app.route('/api/v1/users', followRoutes);
 
 
 // Health Check

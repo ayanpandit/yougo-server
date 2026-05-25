@@ -36,6 +36,24 @@ model User {
   AuditLog               AuditLog[]
   trips                  Trip[]
   likes                  TripLike[]
+
+  followers              Follow[] @relation("Followers")
+  following              Follow[] @relation("Following")
+}
+
+model Follow {
+  id          String   @id @default(uuid())
+  followerId  String
+  followingId String
+  createdAt   DateTime @default(now())
+
+  follower  User @relation("Following", fields: [followerId], references: [id], onDelete: Cascade)
+  following User @relation("Followers", fields: [followingId], references: [id], onDelete: Cascade)
+
+  @@unique([followerId, followingId])
+  @@index([followerId])
+  @@index([followingId])
+  @@map("follows")
 }
 
 model AuditLog {

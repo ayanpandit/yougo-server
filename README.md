@@ -60,8 +60,16 @@ docker compose up -d --build
 
 ## Core Features
 
-### Social & Feed System
-- **Trip Likes Engine:** 
-  - `POST /api/v1/trips/:generationId/like` - Toggles the like status of a trip.
-  - `GET /api/v1/trips/:generationId/likes` - Fetches the strictly safe, public timeline of users who liked a trip.
-- **Optional Authentication:** Smart middleware gracefully handles both authenticated and unauthenticated traffic for public feeds.
+### Social & Follow System
+- **Follow API Engine:**
+  - `POST /api/v1/users/:userId/follow` - Authenticated endpoint to toggle following a user. Returns `{ following: true/false, followersCount: N }`. Prevents self-follows and guarantees uniqueness using composite keys.
+  - `GET /api/v1/users/:userId/followers` - Public endpoint to retrieve a lightweight list of users following a profile (newest first).
+  - `GET /api/v1/users/:userId/following` - Public endpoint to retrieve a lightweight list of users the profile is following (newest first).
+- **Public Profile API:** `GET /api/v1/profile/:username` retrieves comprehensive profile data, including dynamic computation of `followersCount`, `followingCount`, and an context-aware `isFollowing` boolean via Optional Auth middleware.
+
+### Trip Likes System
+- `POST /api/v1/trips/:generationId/like` - Toggles the like status of a trip.
+- `GET /api/v1/trips/:generationId/likes` - Fetches the strictly safe, public timeline of users who liked a trip.
+
+### Optional Authentication
+Smart middleware gracefully handles both authenticated and unauthenticated traffic for public feeds.

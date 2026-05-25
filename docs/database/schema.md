@@ -14,7 +14,13 @@ Stores all primary user account information.
 - **Authentication**: `passwordHash`, `isEmailVerified`, `emailVerificationToken`.
 - **Security**: `failedLoginAttempts`, `lockedUntil`, `lastLoginIp`.
 - **Profile Data**: `name`, `username`, `bio`, `gender`, `dateOfBirth`, `country`, `city`, `travelStyle`, `interests`, `languages`.
+- **Social Graph**: Tracks followers and followings via relations to the `Follow` table.
 - **Metadata**: `createdAt`, `updatedAt`.
+
+### `Follow`
+A self-referencing relationship mapping table for the social graph.
+- **Data**: `followerId`, `followingId`, `createdAt`.
+- **Constraints**: Compound unique constraint on `(followerId, followingId)` to prevent duplicate social links, optimized with individual indices.
 
 ### `AuditLog`
 Stores significant system and user actions for security monitoring and admin transparency.
