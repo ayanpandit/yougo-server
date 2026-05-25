@@ -47,6 +47,38 @@ export class LikeService {
       likesCount,
     };
   }
+
+  async getTripLikes(generationId: string) {
+    const trip = await prisma.trip.findUnique({
+      where: { generationId },
+      select: { id: true },
+    });
+
+    if (!trip) {
+      throw new NotFoundError('Trip not found');
+    }
+
+    const likes = await prisma.tripLike.findMany({
+      where: { tripId: trip.id },
+      orderBy: { createdAt: 'desc' },
+      include: {
+        user: {
+          select: {
+            id: true,
+            username: true,
+            name: true,
+            image: true,
+            bio: true,
+          },
+        },
+      },
+    });
+
+    return likes.map((like) => ({
+      user: like.user,
+      likedAt: like.createdAt,
+    }));
+  }
 }
 
 export const likeService = new LikeService();

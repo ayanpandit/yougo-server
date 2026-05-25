@@ -57,3 +57,11 @@ To run the entire stack (API + Database) in Docker:
 ```bash
 docker compose up -d --build
 ```
+
+## Core Features
+
+### Social & Feed System
+- **Trip Likes Engine:** 
+  - `POST /api/v1/trips/:generationId/like` - Toggles the like status of a trip.
+  - `GET /api/v1/trips/:generationId/likes` - Fetches the strictly safe, public timeline of users who liked a trip.
+- **Optional Authentication:** Smart middleware gracefully handles both authenticated and unauthenticated traffic for public feeds.

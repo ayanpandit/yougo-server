@@ -21,6 +21,20 @@ export class LikeController {
       data: result,
     });
   }
+
+  async getTripLikes(c: Context) {
+    const generationId = c.req.param('generationId');
+    if (!generationId) {
+      throw new UnauthorizedError('Generation ID is required.');
+    }
+
+    const likes = await likeService.getTripLikes(generationId);
+
+    return c.json({
+      status: 'success',
+      data: likes,
+    });
+  }
 }
 
 export const likeController = new LikeController();
