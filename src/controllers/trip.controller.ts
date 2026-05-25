@@ -81,10 +81,8 @@ export class TripController {
   }
 
   async getStatus(c: Context) {
+    // Optional auth since public trips can be viewed
     const user = c.get('user');
-    if (!user) {
-      throw new UnauthorizedError('Unauthorized access');
-    }
 
     const id = c.req.param('id');
     if (!id) {
@@ -94,11 +92,19 @@ export class TripController {
     // Retrieve the trip and assert ownership (fallback to id check)
     let trip = await prisma.trip.findUnique({
       where: { generationId: id },
+      include: {
+        _count: { select: { likes: true } },
+        ...(user ? { likes: { where: { userId: user.id } } } : {})
+      }
     });
 
     if (!trip) {
       trip = await prisma.trip.findUnique({
         where: { id },
+        include: {
+          _count: { select: { likes: true } },
+          ...(user ? { likes: { where: { userId: user.id } } } : {})
+        }
       });
     }
 
@@ -107,7 +113,7 @@ export class TripController {
     }
 
     // Secure ownership assertion: only require ownership for incomplete/draft trips
-    if (trip.status !== 'COMPLETED' && trip.userId !== user.id) {
+    if (trip.status !== 'COMPLETED' && trip.userId !== user?.id) {
       throw new UnauthorizedError('Access Denied: You do not own this in-progress expedition.');
     }
 
@@ -132,6 +138,8 @@ export class TripController {
       stepsCompleted,
       payload: trip.payload,
       response: trip.response,
+      likesCount: trip._count.likes,
+      isLiked: user ? (trip as any).likes?.length > 0 : false,
     };
 
     return c.json({

@@ -1,8 +1,15 @@
 import { tripRepository } from '../repositories/trip.repository';
+import { userRepository } from '../repositories/user.repository';
 
-export class FeedService {
-  async getFeed(currentUserId?: string) {
-    const trips = await tripRepository.findFeedTrips(currentUserId);
+export class ProfileService {
+  async getProfileTrips(username: string, currentUserId?: string) {
+    const user = await userRepository.findByUsername(username);
+    
+    if (!user) {
+      return null; // Signals to controller that user was not found
+    }
+
+    const trips = await tripRepository.findFeedTripsByUserId(user.id, currentUserId);
 
     return trips.map(trip => ({
       tripId: trip.generationId,
@@ -23,4 +30,4 @@ export class FeedService {
   }
 }
 
-export const feedService = new FeedService();
+export const profileService = new ProfileService();

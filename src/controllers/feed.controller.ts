@@ -3,7 +3,8 @@ import { feedService } from '../services/feed.service';
 
 export class FeedController {
   async getFeed(c: Context) {
-    const feed = await feedService.getFeed();
+    const user = c.get('user');
+    const feed = await feedService.getFeed(user?.id);
 
     return c.json({
       status: 'success',
