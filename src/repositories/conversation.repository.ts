@@ -2,18 +2,9 @@ import { prisma } from '../db/prisma';
 
 export class ConversationRepository {
   async findDirectConversation(userAId: string, userBId: string) {
-    // Finds a conversation containing both participants, with exactly 2 participants total.
-    const conversations = await prisma.conversation.findMany({
-      where: {
-        participants: {
-          some: { userId: userAId },
-        },
-        AND: {
-          participants: {
-            some: { userId: userBId },
-          },
-        },
-      },
+    const directKey = [userAId, userBId].sort().join('_');
+    return prisma.conversation.findUnique({
+      where: { directKey },
       include: {
         participants: {
           include: {
@@ -35,42 +26,50 @@ export class ConversationRepository {
         },
       },
     });
-
-    // Filter to ensure it is strictly 1-to-1 (exactly 2 participants)
-    return conversations.find((c) => c.participants.length === 2) || null;
   }
 
   async createDirectConversation(userAId: string, userBId: string) {
-    return prisma.conversation.create({
-      data: {
-        participants: {
-          create: [
-            { userId: userAId },
-            { userId: userBId },
-          ],
+    const directKey = [userAId, userBId].sort().join('_');
+    try {
+      return await prisma.conversation.create({
+        data: {
+          directKey,
+          participants: {
+            create: [
+              { userId: userAId },
+              { userId: userBId },
+            ],
+          },
         },
-      },
-      include: {
-        participants: {
-          include: {
-            user: {
-              select: {
-                id: true,
-                username: true,
-                name: true,
-                image: true,
+        include: {
+          participants: {
+            include: {
+              user: {
+                select: {
+                  id: true,
+                  username: true,
+                  name: true,
+                  image: true,
+                },
               },
             },
           },
-        },
-        messages: {
-          orderBy: {
-            createdAt: 'desc',
+          messages: {
+            orderBy: {
+              createdAt: 'desc',
+            },
+            take: 1,
           },
-          take: 1,
         },
-      },
-    });
+      });
+    } catch (error: any) {
+      // Handle unique constraint race condition gracefully by returning the existing conversation
+      if (error.code === 'P2002') {
+        const existing = await this.findDirectConversation(userAId, userBId);
+        if (existing) return existing;
+      }
+      throw error;
+    }
   }
 
   async findUserConversations(userId: string) {
