@@ -11,6 +11,7 @@ import likeRoutes from '../routes/like.routes';
 import followRoutes from '../routes/follow.routes';
 import { errorHandler, notFoundHandler } from '../middleware/error.middleware';
 import { env } from '../config/env';
+import conversationRoutes from '../routes/conversation.routes';
 
 const app = new Hono();
 
@@ -40,6 +41,7 @@ app.route('/api/v1/feed', feedRoutes);
 app.route('/profile', profileRoutes);
 app.route('/api/v1/trips', likeRoutes);
 app.route('/api/v1/users', followRoutes);
+app.route('/api/v1/conversations', conversationRoutes);
 
 
 // Health Check

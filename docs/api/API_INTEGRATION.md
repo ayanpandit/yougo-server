@@ -421,3 +421,120 @@ Fetches comprehensive profile details along with dynamic follow metrics.
     }
   }
   ```
+
+---
+
+## 8. Direct Messaging (DM) System
+
+All direct messaging endpoints require full user authentication. Messages belong strictly to Conversation Containers, decoupling direct user-to-user links for scalable group chat architectures.
+
+### 1. Get or Create Direct Conversation
+Retrieves an existing direct 1-to-1 conversation between the authenticated user and another traveler, or initializes a brand new conversation if none exists.
+
+- **Endpoint**: `POST /api/v1/conversations/direct/:userId`
+- **Auth Required**: ✅ Yes
+- **Response Shape**:
+  ```json
+  {
+    "status": "success",
+    "data": {
+      "conversationId": "uuid",
+      "participant": {
+        "id": "uuid",
+        "username": "travel_partner",
+        "name": "Travel Partner",
+        "image": "https://..."
+      },
+      "createdAt": "2026-05-26T12:00:00.000Z",
+      "updatedAt": "2026-05-26T12:00:00.000Z"
+    }
+  }
+  ```
+
+### 2. List Conversations
+Lists all conversations the authenticated user is currently participating in, loaded with lightweight latest message previews and metadata.
+
+- **Endpoint**: `GET /api/v1/conversations`
+- **Auth Required**: ✅ Yes
+- **Response Shape**:
+  ```json
+  {
+    "status": "success",
+    "data": [
+      {
+        "conversationId": "uuid",
+        "updatedAt": "2026-05-26T12:05:00.000Z",
+        "participant": {
+          "id": "uuid",
+          "username": "travel_partner",
+          "name": "Travel Partner",
+          "image": "https://..."
+        },
+        "lastMessage": {
+          "id": "uuid",
+          "text": "See you in Bali!",
+          "createdAt": "2026-05-26T12:05:00.000Z",
+          "senderId": "uuid"
+        }
+      }
+    ]
+  }
+  ```
+
+### 3. Get Conversation Messages
+Loads conversation messages in chronological order, with built-in cursor-based or page-based offsets.
+
+- **Endpoint**: `GET /api/v1/conversations/:conversationId/messages`
+- **Auth Required**: ✅ Yes
+- **Query Parameters**:
+  - `limit`: defaults to `50`
+  - `offset`: defaults to `0`
+- **Response Shape**:
+  ```json
+  {
+    "status": "success",
+    "data": [
+      {
+        "messageId": "uuid",
+        "text": "Hey! Are you excited for the Bali trip?",
+        "createdAt": "2026-05-26T12:00:00.000Z",
+        "sender": {
+          "id": "uuid",
+          "username": "travel_partner",
+          "name": "Travel Partner",
+          "image": "https://..."
+        }
+      }
+    ]
+  }
+  ```
+
+### 4. Send Message
+Sends a direct text message within the specified conversation and updates the conversation's active timestamp.
+
+- **Endpoint**: `POST /api/v1/conversations/:conversationId/messages`
+- **Auth Required**: ✅ Yes
+- **Request Body**:
+  ```json
+  {
+    "text": "Absolutely! I have already started packing."
+  }
+  ```
+- **Response Shape**:
+  ```json
+  {
+    "status": "success",
+    "data": {
+      "messageId": "uuid",
+      "text": "Absolutely! I have already started packing.",
+      "createdAt": "2026-05-26T12:06:00.000Z",
+      "sender": {
+        "id": "uuid",
+        "username": "current_user",
+        "name": "Current User",
+        "image": "https://..."
+      }
+    }
+  }
+  ```
+
