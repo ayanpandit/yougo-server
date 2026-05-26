@@ -37,11 +37,12 @@ export function initSocketGateway(httpServer: any) {
       }
 
       const decoded = jwt.verify(token, env.JWT_SECRET) as any;
-      if (!decoded.userId) {
+      const userId = decoded.userId || decoded.sub;
+      if (!userId) {
         return next(new Error('Authentication failed: Invalid payload'));
       }
 
-      socket.data.userId = decoded.userId;
+      socket.data.userId = userId;
       next();
     } catch (err) {
       console.error('[SocketGateway] Authentication error:', err);
