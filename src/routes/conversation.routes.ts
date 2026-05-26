@@ -9,6 +9,7 @@ conversationRoutes.use('/*', requireAuth);
 
 conversationRoutes.post('/direct/:userId', c => conversationController.getOrCreateDirectConversation(c));
 conversationRoutes.get('/', c => conversationController.getUserConversations(c));
+conversationRoutes.post('/media/upload', c => conversationController.uploadMedia(c));
 conversationRoutes.get('/:conversationId/messages', c => conversationController.getConversationMessages(c));
 conversationRoutes.post('/:conversationId/messages', c => conversationController.sendMessage(c));
 

@@ -2,6 +2,8 @@ import { conversationRepository } from '../repositories/conversation.repository'
 import { messageRepository } from '../repositories/message.repository';
 import { userRepository } from '../repositories/user.repository';
 import { BadRequestError, NotFoundError, ForbiddenError } from '../utils/errors';
+import { MessageType } from '@prisma/client';
+import { broadcastToConversationRoom } from '../gateway/socket.gateway';
 
 export class ConversationService {
   async getOrCreateDirectConversation(senderId: string, targetUserId: string) {
@@ -77,10 +79,21 @@ export class ConversationService {
     return [...messages].reverse();
   }
 
-  async sendMessage(conversationId: string, senderId: string, text: string) {
-    const sanitizedText = text.trim();
-    if (!sanitizedText) {
+  async sendMessage(
+    conversationId: string,
+    senderId: string,
+    text?: string,
+    type: MessageType = 'TEXT',
+    mediaUrl?: string,
+    mediaPublicId?: string
+  ) {
+    const sanitizedText = text?.trim();
+    
+    if (type === 'TEXT' && !sanitizedText) {
       throw new BadRequestError('Message text cannot be empty');
+    }
+    if (type !== 'TEXT' && !mediaUrl) {
+      throw new BadRequestError('Media URL is required for media messages');
     }
 
     // Security check: sender must be a participant of the conversation
@@ -89,17 +102,34 @@ export class ConversationService {
       throw new ForbiddenError('You do not have permission to send messages to this conversation');
     }
 
-    const message = await messageRepository.createMessage(conversationId, senderId, sanitizedText);
+    const message = await messageRepository.createMessage(
+      conversationId,
+      senderId,
+      sanitizedText,
+      type,
+      mediaUrl,
+      mediaPublicId
+    );
 
     // Update conversation updatedAt timestamp to bump it to the top of list
     await conversationRepository.updateConversationTimestamp(conversationId);
 
-    return {
+    const result = {
       messageId: message.id,
       text: message.text,
+      type: message.type,
+      mediaUrl: message.mediaUrl,
+      mediaPublicId: message.mediaPublicId,
+      seenAt: message.seenAt,
+      deliveredAt: message.deliveredAt,
       createdAt: message.createdAt,
       sender: message.sender,
     };
+
+    // Broadcast realtime event synchronization to active rooms
+    broadcastToConversationRoom(conversationId, 'message:receive', result);
+
+    return result;
   }
 }
 

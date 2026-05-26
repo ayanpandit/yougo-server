@@ -1,6 +1,7 @@
 import { Context } from 'hono';
 import { conversationService } from '../services/conversation.service';
 import { BadRequestError } from '../utils/errors';
+import { cloudinaryService } from '../services/cloudinary.service';
 
 export class ConversationController {
   async getOrCreateDirectConversation(c: Context) {
@@ -65,17 +66,77 @@ export class ConversationController {
     }
 
     const body = await c.req.json().catch(() => ({}));
-    const { text } = body;
+    const { text, type, mediaUrl, mediaPublicId } = body;
 
-    if (!text || typeof text !== 'string') {
-      throw new BadRequestError('Message text is required and must be a string');
+    const messageType = type || 'TEXT';
+
+    if (messageType === 'TEXT' && (!text || typeof text !== 'string')) {
+      throw new BadRequestError('Message text is required and must be a string for TEXT messages');
     }
 
-    const result = await conversationService.sendMessage(conversationId, user.id, text);
+    const result = await conversationService.sendMessage(
+      conversationId,
+      user.id,
+      text,
+      messageType,
+      mediaUrl,
+      mediaPublicId
+    );
 
     return c.json({
       status: 'success',
       data: result,
+    });
+  }
+
+  async uploadMedia(c: Context) {
+    const body = await c.req.parseBody();
+    const file = body.file;
+
+    if (!file || !(file instanceof File)) {
+      throw new BadRequestError('No media file provided');
+    }
+
+    // Determine type and validate size
+    let messageType = 'FILE';
+    const mimeType = file.type;
+    const size = file.size;
+
+    if (mimeType.startsWith('image/')) {
+      messageType = 'IMAGE';
+      if (size > 10 * 1024 * 1024) {
+        throw new BadRequestError('Image size cannot exceed 10MB');
+      }
+    } else if (mimeType.startsWith('video/')) {
+      messageType = 'VIDEO';
+      if (size > 50 * 1024 * 1024) {
+        throw new BadRequestError('Video size cannot exceed 50MB');
+      }
+    } else if (mimeType.startsWith('audio/')) {
+      messageType = 'AUDIO';
+      if (size > 10 * 1024 * 1024) {
+        throw new BadRequestError('Audio size cannot exceed 10MB');
+      }
+    } else {
+      // General doc files
+      if (size > 50 * 1024 * 1024) {
+        throw new BadRequestError('File size cannot exceed 50MB');
+      }
+    }
+
+    const arrayBuffer = await file.arrayBuffer();
+    const buffer = Buffer.from(arrayBuffer);
+
+    const uploadResult = await cloudinaryService.uploadFile(buffer, mimeType, 'yougo_chat_media');
+
+    return c.json({
+      status: 'success',
+      data: {
+        url: uploadResult.secure_url,
+        publicId: uploadResult.public_id,
+        type: messageType,
+        fileName: file.name
+      }
     });
   }
 }

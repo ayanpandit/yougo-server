@@ -25,12 +25,14 @@
     "dotenv": "^16.4.5",
     "hono": "^4.3.7",
     "jsonwebtoken": "^9.0.3",
+    "socket.io": "^4.8.3",
     "zod": "^3.23.8"
   },
   "devDependencies": {
     "@types/bcryptjs": "^2.4.6",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^20.12.12",
+    "@types/socket.io": "^3.0.1",
     "@typescript-eslint/eslint-plugin": "^7.9.0",
     "@typescript-eslint/parser": "^7.9.0",
     "eslint": "^8.57.0",

@@ -153,13 +153,30 @@ model ConversationParticipant {
   @@map("conversation_participants")
 }
 
+enum MessageType {
+  TEXT
+  IMAGE
+  VIDEO
+  AUDIO
+  FILE
+}
+
 model Message {
   id             String       @id @default(uuid())
   conversationId String
   senderId       String
-  text           String       @db.Text
-  createdAt      DateTime     @default(now())
+  text           String?      // Nullable in case of pure media messages
+  type           MessageType  @default(TEXT)
+  
+  // Media references
+  mediaUrl       String?
+  mediaPublicId  String?
+  
+  // Receipts
   seenAt         DateTime?
+  deliveredAt    DateTime?
+  
+  createdAt      DateTime     @default(now())
 
   conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
   sender         User         @relation(fields: [senderId], references: [id], onDelete: Cascade)

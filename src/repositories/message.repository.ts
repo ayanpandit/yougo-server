@@ -1,12 +1,23 @@
 import { prisma } from '../db/prisma';
+import { MessageType } from '@prisma/client';
 
 export class MessageRepository {
-  async createMessage(conversationId: string, senderId: string, text: string) {
+  async createMessage(
+    conversationId: string,
+    senderId: string,
+    text?: string,
+    type: MessageType = 'TEXT',
+    mediaUrl?: string,
+    mediaPublicId?: string
+  ) {
     return prisma.message.create({
       data: {
         conversationId,
         senderId,
         text,
+        type,
+        mediaUrl,
+        mediaPublicId,
       },
       include: {
         sender: {
