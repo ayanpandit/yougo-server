@@ -73,10 +73,22 @@ export class ConversationService {
 
     const messages = await messageRepository.findConversationMessages(conversationId, limit, offset);
 
+    const formattedMessages = messages.map((message) => ({
+      messageId: message.id,
+      text: message.text,
+      type: message.type,
+      mediaUrl: message.mediaUrl,
+      mediaPublicId: message.mediaPublicId,
+      seenAt: message.seenAt,
+      deliveredAt: message.deliveredAt,
+      createdAt: message.createdAt,
+      sender: message.sender,
+    }));
+
     // DMs typically display chronologically (oldest to newest), but repositories return newest first for efficient pagination.
     // The client or layout can reverse them, but returning them sorted chronologically (asc) within this paginated set is standard.
     // Let's reverse the slice in the service so the paginated batch is chronological.
-    return [...messages].reverse();
+    return [...formattedMessages].reverse();
   }
 
   async sendMessage(
