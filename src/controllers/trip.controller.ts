@@ -5,6 +5,7 @@ import { randomUUID } from 'crypto';
 import { BadRequestError, NotFoundError, UnauthorizedError } from '../utils/errors';
 import { manualTripService } from '../services/manual-trip.service';
 import { cloudinaryService } from '../services/cloudinary.service';
+import { cacheService } from '../services/cache.service';
 
 export class TripController {
   async generate(c: Context) {
@@ -89,6 +90,40 @@ export class TripController {
       throw new BadRequestError('Generation ID is required');
     }
 
+    // 1. Attempt cache hit for completed trip
+    const cacheKey = `yougo:trip:${id}`;
+    let cachedItem = await cacheService.get<any>(cacheKey);
+
+    if (cachedItem) {
+      try {
+        let isLiked = false;
+        if (user) {
+          const like = await prisma.tripLike.findFirst({
+            where: {
+              userId: user.id,
+              trip: {
+                OR: [
+                  { generationId: cachedItem.generationId },
+                  { id: cachedItem.generationId }
+                ]
+              }
+            }
+          });
+          isLiked = !!like;
+        }
+
+        return c.json({
+          status: 'success',
+          data: [{
+            ...cachedItem,
+            isLiked
+          }]
+        });
+      } catch (err: any) {
+        console.error('⚠️ [TripController] Failed to resolve likes for cached trip, bypassing cache:', err.message || err);
+      }
+    }
+
     // Retrieve the trip and assert ownership (fallback to id check)
     let trip = await prisma.trip.findUnique({
       where: { generationId: id },
@@ -139,12 +174,24 @@ export class TripController {
       payload: trip.payload,
       response: trip.response,
       likesCount: trip._count.likes,
+      isLiked: false, // Public base layout defaults to false
+    };
+
+    // 2. Cache completed trip statuses in Redis
+    if (trip.status === 'COMPLETED') {
+      await cacheService.set(`yougo:trip:${trip.generationId}`, item);
+      await cacheService.set(`yougo:trip:${trip.id}`, item);
+    }
+
+    // Map isLiked dynamically for response client return
+    const clientResponseItem = {
+      ...item,
       isLiked: user ? (trip as any).likes?.length > 0 : false,
     };
 
     return c.json({
       status: 'success',
-      data: [item],
+      data: [clientResponseItem],
     });
   }
 
@@ -171,6 +218,15 @@ export class TripController {
 
     // 2. Process and save the manual trip
     const trip = await manualTripService.saveManualTrip(user.id, body);
+
+    // Invalidate public feed and profile caches on trip completion
+    if (body.status === 'COMPLETED') {
+      cacheService.del('yougo:feed:public').catch(() => {});
+      if (user.username) {
+        cacheService.del(`yougo:profile:${user.username.toLowerCase()}:trips`).catch(() => {});
+        cacheService.del(`yougo:profile:${user.username.toLowerCase()}`).catch(() => {});
+      }
+    }
 
     return c.json({
       status: 'success',

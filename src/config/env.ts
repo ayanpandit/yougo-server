@@ -16,7 +16,8 @@ const envSchema = z.object({
   CLOUDINARY_CLOUD_NAME: z.string().optional(),
   CLOUDINARY_API_KEY: z.string().optional(),
   CLOUDINARY_API_SECRET: z.string().optional(),
-  BRAIN_SERVICE_URL: z.string().url().default('http://127.0.0.1:8001')
+  BRAIN_SERVICE_URL: z.string().url().default('http://127.0.0.1:8001'),
+  REDIS_URL: z.string().default('redis://127.0.0.1:6379')
 });
 
 // Pre-process process.env to defensively strip any surrounding quotes automatically applied by Railway/cloud hosting

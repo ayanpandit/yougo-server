@@ -2,6 +2,7 @@ import { followRepository } from '../repositories/follow.repository';
 import { userRepository } from '../repositories/user.repository';
 import { BadRequestError, NotFoundError } from '../utils/errors';
 import { prisma } from '../db/prisma';
+import { cacheService } from './cache.service';
 
 export class FollowService {
   async toggleFollow(followerId: string, followingId: string) {
@@ -12,6 +13,11 @@ export class FollowService {
     const followingUser = await userRepository.findById(followingId);
     if (!followingUser) {
       throw new NotFoundError('User to follow not found');
+    }
+
+    const followerUser = await userRepository.findById(followerId);
+    if (!followerUser) {
+      throw new NotFoundError('Follower user not found');
     }
 
     const existingFollow = await followRepository.findUnique(followerId, followingId);
@@ -29,6 +35,14 @@ export class FollowService {
     const followersCount = await prisma.follow.count({
       where: { followingId },
     });
+
+    // Invalidate Redis profile caches in the background (fire-and-forget)
+    if (followingUser.username) {
+      cacheService.del(`yougo:profile:${followingUser.username.toLowerCase()}`).catch(() => {});
+    }
+    if (followerUser.username) {
+      cacheService.del(`yougo:profile:${followerUser.username.toLowerCase()}`).catch(() => {});
+    }
 
     return {
       following: isFollowing,

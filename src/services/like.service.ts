@@ -1,12 +1,16 @@
 import { prisma } from '../db/prisma';
 import { NotFoundError } from '../utils/errors';
+import { cacheService } from './cache.service';
 
 export class LikeService {
   async toggleLike(userId: string, generationId: string) {
-    // Look up the actual internal trip ID from generationId
+    // Look up the actual internal trip ID and creator details from generationId
     const trip = await prisma.trip.findUnique({
       where: { generationId },
-      select: { id: true },
+      select: { 
+        id: true,
+        user: { select: { username: true } }
+      },
     });
 
     if (!trip) {
@@ -41,6 +45,14 @@ export class LikeService {
     const likesCount = await prisma.tripLike.count({
       where: { tripId: trip.id },
     });
+
+    // Invalidate caches in background (fire-and-forget)
+    cacheService.del('yougo:feed:public').catch(() => {});
+    cacheService.del(`yougo:trip:${generationId}`).catch(() => {});
+    cacheService.del(`yougo:trip:${trip.id}`).catch(() => {});
+    if (trip.user.username) {
+      cacheService.del(`yougo:profile:${trip.user.username.toLowerCase()}:trips`).catch(() => {});
+    }
 
     return {
       isLiked: !existingLike, // If it existed, it's now deleted (unliked), otherwise it was created
