@@ -12,5 +12,6 @@ tripRoutes.post('/manual/upload-image', requireAuth, c => tripController.uploadT
 tripRoutes.get('/manual/drafts', requireAuth, c => tripController.getUserDrafts(c));
 tripRoutes.post('/:id/publish', requireAuth, c => tripController.publishTrip(c));
 tripRoutes.get('/:id', optionalAuth, c => tripController.getStatus(c));
+tripRoutes.delete('/:id', requireAuth, c => tripController.deleteTrip(c));
 
 export default tripRoutes;

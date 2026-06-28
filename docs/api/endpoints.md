@@ -66,6 +66,12 @@ Publishes a generated AI itinerary so it becomes visible on the public social fe
 - **Method**: `POST`
 - **Auth Required**: Yes (Bearer Token). Must be the owner of the trip.
 
+### Delete Trip
+Permanently deletes a trip and all its associated data (e.g., likes).
+- **URL**: `/api/v1/generate/:id`
+- **Method**: `DELETE`
+- **Auth Required**: Yes (Bearer Token). Must be the owner of the trip.
+
 ### Toggle Follow
 Toggles the follow state for a target user.
 - **URL**: `/api/v1/users/:userId/follow`

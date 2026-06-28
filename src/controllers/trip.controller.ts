@@ -346,6 +346,55 @@ export class TripController {
       }
     });
   }
+
+  async deleteTrip(c: Context) {
+    const user = c.get('user');
+    if (!user) {
+      throw new UnauthorizedError('Unauthorized access');
+    }
+
+    const id = c.req.param('id');
+    if (!id) {
+      throw new BadRequestError('Generation ID is required');
+    }
+
+    let trip = await prisma.trip.findUnique({
+      where: { generationId: id }
+    });
+
+    if (!trip) {
+      trip = await prisma.trip.findUnique({
+        where: { id }
+      });
+    }
+
+    if (!trip) {
+      throw new NotFoundError(`Trip with ID "${id}" not found`);
+    }
+
+    if (trip.userId !== user.id) {
+      throw new UnauthorizedError('Access Denied: You do not own this expedition.');
+    }
+
+    await prisma.trip.delete({
+      where: { id: trip.id }
+    });
+
+    // Invalidate caches
+    cacheService.del('yougo:feed:public').catch(() => {});
+    cacheService.del(`yougo:trip:${trip.generationId}`).catch(() => {});
+    cacheService.del(`yougo:trip:${trip.id}`).catch(() => {});
+
+    if (user.username) {
+      cacheService.del(`yougo:profile:${user.username.toLowerCase()}:trips`).catch(() => {});
+      cacheService.del(`yougo:profile:${user.username.toLowerCase()}`).catch(() => {});
+    }
+
+    return c.json({
+      status: 'success',
+      message: 'Expedition deleted successfully'
+    });
+  }
 }
 
 export const tripController = new TripController();

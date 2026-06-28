@@ -213,6 +213,20 @@ When the AI generation completes, it is stored in the database with `isPublished
      ```
    - **Frontend Action**: Send a `POST` request to this endpoint and redirect the user to the Explore feed (`/explore`).
 
+### Step 4: Deleting a Trip
+A user can delete their own trip permanently from their profile dashboard. This triggers a cascading delete of the trip and all its associated likes.
+
+- **Endpoint**: `DELETE /api/v1/generate/:generationId`
+- **Auth Required**: ✅ Yes (Must be the creator)
+- **Response**:
+  ```json
+  {
+    "status": "success",
+    "message": "Expedition deleted successfully"
+  }
+  ```
+- **Frontend Action**: Prompt the user with a confirmation modal. On confirmation, send a `DELETE` request, remove the item from local state, and update the UI accordingly.
+
 ---
 
 ## 5. Error Handling Convention
