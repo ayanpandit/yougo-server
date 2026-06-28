@@ -413,6 +413,7 @@ export class ManualTripService {
 
     const dbData = {
       status: dto.status, // DRAFT or COMPLETED
+      isPublished: dto.status === 'COMPLETED',
       payload: payloadJson as any, // Canonical input details
       response: responseJson,
       type: 'user', // Manual trip

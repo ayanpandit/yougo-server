@@ -5,6 +5,7 @@ export class TripRepository {
     return prisma.trip.findMany({
       where: {
         status: 'COMPLETED',
+        isPublished: true,
       },
       select: {
         id: true,
@@ -37,10 +38,12 @@ export class TripRepository {
     });
   }
   async findFeedTripsByUserId(userId: string, currentUserId?: string) {
+    const showAll = currentUserId === userId;
     return prisma.trip.findMany({
       where: {
         userId,
         status: 'COMPLETED',
+        ...(showAll ? {} : { isPublished: true }),
       },
       select: {
         id: true,

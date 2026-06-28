@@ -106,6 +106,7 @@ model Trip {
   perPersonCost  Int?
 
   likes          TripLike[]
+  isPublished    Boolean          @default(false)
 
   @@map("trips")
 }

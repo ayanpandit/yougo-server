@@ -10,6 +10,7 @@ tripRoutes.post('/', requireAuth, c => tripController.generate(c));
 tripRoutes.post('/manual', requireAuth, c => tripController.createManual(c));
 tripRoutes.post('/manual/upload-image', requireAuth, c => tripController.uploadTripImage(c));
 tripRoutes.get('/manual/drafts', requireAuth, c => tripController.getUserDrafts(c));
+tripRoutes.post('/:id/publish', requireAuth, c => tripController.publishTrip(c));
 tripRoutes.get('/:id', optionalAuth, c => tripController.getStatus(c));
 
 export default tripRoutes;

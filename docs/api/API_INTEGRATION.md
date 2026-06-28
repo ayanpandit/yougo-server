@@ -193,6 +193,26 @@ Because AI generation takes 10-30 seconds, the frontend should implement a polli
   ```
 - **Frontend Action**: Stop polling. Navigate the user to the detailed trip view page and pass the complete `response` object.
 
+### Step 3: Saving or Posting the Trip
+When the AI generation completes, it is stored in the database with `isPublished: false` by default, meaning it is not visible on the public `/feed` endpoint. The creator has two options:
+1. **Save Expedition**: Keep the trip private. It remains accessible to the owner via their private profile dashboard, but is excluded from the public feed.
+2. **Post to Explore Feed**: Call the publish endpoint to set `isPublished: true`, making it public.
+   - **Endpoint**: `POST /api/v1/generate/:generationId/publish`
+   - **Auth Required**: ✅ Yes (Must be the creator)
+   - **Response**:
+     ```json
+     {
+       "status": "success",
+       "message": "Expedition published successfully",
+       "data": {
+         "id": "database-uuid",
+         "generationId": "unique-job-uuid",
+         "isPublished": true
+       }
+     }
+     ```
+   - **Frontend Action**: Send a `POST` request to this endpoint and redirect the user to the Explore feed (`/explore`).
+
 ---
 
 ## 5. Error Handling Convention

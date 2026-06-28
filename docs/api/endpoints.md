@@ -58,6 +58,12 @@ Dispatches a new AI itinerary generation job.
 Retrieves the real-time execution telemetry and final JSON output of a trip.
 - **URL**: `/api/v1/generate/:id`
 - **Method**: `GET`
+- **Auth Required**: Yes (Bearer Token). Must be the owner of the trip if not completed.
+
+### Publish AI Trip
+Publishes a generated AI itinerary so it becomes visible on the public social feed.
+- **URL**: `/api/v1/generate/:id/publish`
+- **Method**: `POST`
 - **Auth Required**: Yes (Bearer Token). Must be the owner of the trip.
 
 ### Toggle Follow

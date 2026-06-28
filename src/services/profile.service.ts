@@ -40,7 +40,7 @@ export class ProfileService {
         return null;
       }
 
-      const trips = await tripRepository.findFeedTripsByUserId(user.id);
+      const trips = await tripRepository.findFeedTripsByUserId(user.id, currentUserId);
       tripsList = trips.map(trip => ({
         tripId: trip.generationId,
         coverImage: trip.coverImage,
