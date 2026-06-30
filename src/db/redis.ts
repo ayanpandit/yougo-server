@@ -4,6 +4,7 @@ import { env } from '../config/env';
 let isConnected = false;
 
 const redis = new Redis(env.REDIS_URL, {
+  keyPrefix: 'server:',
   maxRetriesPerRequest: null,
   retryStrategy(times) {
     // Reconnection retry backoff capped at 3 seconds
